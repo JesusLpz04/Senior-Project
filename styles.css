@@ -1,0 +1,119 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #F8F5F0;
+}
+
+/* Navbar */
+nav {
+    background-color: #002D56;
+    padding: 15px;
+    text-align: left;
+}
+
+.logo {
+    color: white;
+    font-size: 40px;
+    font-weight: bold;
+    margin-left: 20px;
+}
+
+/* Box Container (Wrapper for Coming Soon & Form) */
+.box-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+}
+
+.container {
+    display: flex;
+    gap: 150px;
+
+    padding: 60px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+
+}
+
+/* Coming Soon Section */
+.coming-soon h1 {
+    font-size: 40px;
+    color: #002D56;
+    font-weight: bold;
+}
+
+.coming-soon span {
+    text-decoration: underline;
+}
+
+.coming-soon p {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Login Form */
+.login-form {
+    background: #F8F5F0;
+    padding: 50px;
+    border-radius: 10px;
+    border: 1px solid  #ddd ;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    height: 300px;
+}
+
+.login-form h3 {
+    font-size: 16px;
+    color: #999;
+}
+
+.login-form label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.btn {
+    width: 100%;
+    background-color: #002D56;
+    color: white;
+    padding: 10px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #004080;
+}
+
+.login-form p {
+    font-size: 12px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.login-form a {
+    color: #002D56;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.login-form a:hover {
+    text-decoration: underline;
+}
+
