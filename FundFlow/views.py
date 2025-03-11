@@ -1,5 +1,16 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.template import loader
 
-def FundFlow(request):
-    return HttpResponse("Hello world!")
+def fund_flow(request):
+    return HttpResponse("Hello, this is your fundflow method!")
+
+def home(request):
+    return render(request, 'home.html', {})
+
+#add sign in, log out here 
+
+#later, will require login
+def landing_page(request):
+    template = loader.get_template('landing_page.html')
+    return HttpResponse(template.render())
