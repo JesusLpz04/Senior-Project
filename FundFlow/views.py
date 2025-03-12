@@ -5,10 +5,13 @@ from django.template import loader
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
 
-def home(request):
+def home_logIn(request):
     return render(request, 'home.html', {})
 
-#add sign in, log out here 
+
+def signup_view(request):
+    template = loader.get_template('signUp.html')
+    return HttpResponse(template.render())
 
 #later, will require login
 def landing_page(request):
