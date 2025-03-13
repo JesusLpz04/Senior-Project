@@ -15,5 +15,5 @@ def signup_view(request):
 
 #later, will require login
 def landing_page(request):
-    template = loader.get_template('landing_page.html')
+    template = loader.get_template('landingPage.html')
     return HttpResponse(template.render())

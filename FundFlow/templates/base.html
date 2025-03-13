@@ -5,17 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Landing Page</title>
     {%load static%}
-    <link rel="stylesheet" href="{% static 'landing_page_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'landingPage.css' %}">
     <link rel="stylesheet" href="{% static 'home.css' %}">
     <link rel="stylesheet" href="{% static 'signUp.css' %}">
+    <link rel="stylesheet" href="{% static 'index.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
   </head>
 
 
   <body>
-    {%block content%}
-    {%endblock%}
+    <!-- Navbar (Now in base.html) -->
+    <header class="py-3 mb-4 border-bottom" id="header">
+      <div class="header-container">
+          <!-- Hamburger Menu Icon -->
+          <span id="menu-toggle" class="menu-icon">&#9776;</span>
+
+          <!-- Side Menu -->
+          <div id="side-menu" class="side-menu">
+              <a href="#" class="close-btn" onclick="closeMenu()">&times;</a>
+              <a href="#">Manage Org.</a>
+              <a href="#">Treasury Tickets</a>
+              <a href="#">Budget Review</a>
+          </div>
+
+          <!-- Logo -->
+          <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none">
+              <span class="logo">
+                  <img src="{% static 'images/FundFlow_logo.png' %}" alt="Logo">
+              </span>
+          </a>
+      </div>
+    </header>
+
+    <nav class="py-2 bg-body-tertiary border-bottom">
+        <div class="container d-flex flex-wrap">
+            <ul class="nav me-auto">
+                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2" aria-current="page">Dashboard</a></li>
+                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Expenses</a></li>
+                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Voting</a></li>
+                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Marketplace</a></li>
+                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+  <!-- Page Content -->
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script>
+      document.getElementById("menu-toggle").addEventListener("click", function() {
+        document.getElementById("side-menu").style.width = "250px";
+      });
+
+      function closeMenu() {
+        document.getElementById("side-menu").style.width = "0";
+      }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   </body>
 </html>
