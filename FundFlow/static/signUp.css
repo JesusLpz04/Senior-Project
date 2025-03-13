@@ -1,24 +1,10 @@
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #F8F5F0;
 }
 
-/* Navbar */
-nav {
-    background-color: #002D56;
-    padding: 15px;
-    text-align: left;
-}
-
-.logo {
-    color: white;
-    font-size: 40px;
-    font-weight: bold;
-    margin-left: 20px;
-}
 
 /* Box Container */
 .box-container {
@@ -28,7 +14,7 @@ nav {
     height: 80vh;
 }
 
-.container {
+.word-container {
     display: flex;
     gap: 150px;
     background: #F8F5F0;

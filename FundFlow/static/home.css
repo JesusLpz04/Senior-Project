@@ -1,23 +1,16 @@
+@font-face {
+    font-family: 'Overpass';
+    font-style: normal;
+    font-weight: 300; /* Light weight */
+    src: url('/static/fonts/Overpass-VariableFont_wght.ttf') format('truetype');
+}
+
 /* General Styles */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #F8F5F0;
-}
-
-/* Navbar */
-nav {
-    background-color: #002D56;
-    padding: 15px;
-    text-align: left;
-}
-
-.logo {
-    color: white;
-    font-size: 40px;
-    font-weight: bold;
-    margin-left: 20px;
+    font-family: 'Overpass', sans-serif;
 }
 
 /* Box Container (Wrapper for Coming Soon & Form) */
@@ -28,7 +21,7 @@ nav {
     height: 80vh;
 }
 
-.container {
+.word-container {
     display: flex;
     gap: 150px;
 

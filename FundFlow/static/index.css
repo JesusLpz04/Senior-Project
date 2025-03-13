@@ -1,0 +1,109 @@
+/* General Styles */
+body {
+    background-color: #FAF6F1; /* Light text */
+    margin: 0;
+}
+
+/* Header Styling */
+#header {
+    background-color: #053C5E;
+    border-bottom: 1px solid #2a668b;
+    padding: 1rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures items are on the same row */
+}
+
+/* Container inside the header */
+.header-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Adds spacing between menu and logo */
+}
+
+/* Hamburger Menu */
+.menu-icon {
+    font-size: 30px;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Logo */
+.logo img {
+    height: 70px;
+    width: auto;
+}
+
+/* Side Menu Styling */
+.side-menu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #053C5E;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+}
+
+.side-menu a {
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 20px;
+    color: white;
+    display: block;
+    transition: 0.3s;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 300; /* Ensure it matches the defined weight */
+}
+
+.side-menu a:hover {
+    background-color: #2a668b;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-size: 36px;
+    color: white;
+    cursor: pointer;
+}
+
+/* Navbar Styling */
+nav {
+    background-color: #FAF6F1; /* Slightly lighter dark */
+    border-bottom: 1px solid #fffbfb;
+    padding: 0.5rem 0;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5); /* Adds a subtle drop shadow */
+}
+
+.nav {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    margin: 0 10px;
+}
+
+.nav-link {
+    color: black;
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 5px 10px;
+    transition: color 0.3s ease;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 300; /* Ensure it matches the defined weight */
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #adb5bd; /* Lighter gray */
+}
+

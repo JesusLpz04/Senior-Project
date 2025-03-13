@@ -12,30 +12,6 @@ body {
     
 }
 
-header {
-    background-color: #003366;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 20px;
-}
-.header{
-    background-color: #F8F5F0;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 20px;
-    border: 1px solid #ddd;
-}
-
-.logo {
-    color: white;
-    font-size: 40px;
-    font-weight: bold;
-    margin-left: 20px;
-}
 
 .reg-container {
     display: flex;
