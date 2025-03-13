@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <head>
+        <link rel="stylesheet" href="{% static '/registerorg.css' %}">
+    </head>
+
+    <header>
+        <div class="logo">FundFlow</div>
+    </header>
+
+    <div class="reg-container">
+
+        <main>
+        {% comment %} hard coded: later create model for orgs list  {% endcomment %}
+            <div class="reg-org-section">
+                <div class="reg-info-container">
+                    <div class="reg-text-container">
+                        <label for="reg-text-label">All organizations registered on Unicents must be
+                             officially recognized on vLink as student organizations. Please 
+                             confirm that your organization is registered on vLink by selecting
+                             from the drop down menu.
+                        </label>
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <label id: for="dropdown">Select your student organization.</label>
+                            <select name="dropdown" id="dropdown">
+                                {% for option in options %}
+                                    <option value="{{ option }}">{{ option }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+
+    
+                        <label for="reg-text-label">
+                        Only presidents of the student organization may register their organization
+                         on Unicents. Please confirm that you are the  organization’s current
+                        president listed on vLink. 
+                        </label>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="reg-text-label">
+                                <input type="checkbox" id="agree" name="agree" required>
+                                <label class="reg-text-container" for="agree">
+                                    I confirm that I am the current President of this organization.                                 
+                                </label>
+                            </div>
+                            <button class="register-btn" >Confirm Registration</button>                   
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+{% endblock %}
