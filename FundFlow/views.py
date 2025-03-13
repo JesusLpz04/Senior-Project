@@ -17,3 +17,8 @@ def signup_view(request):
 def landing_page(request):
     template = loader.get_template('landingPage.html')
     return HttpResponse(template.render())
+
+def register_org(request):
+    dropdown_options = ["Org 1", "Org 2", "Org 3"]  #Hardcoded data for now 
+    return render(request, "registerorg.html", {"options": dropdown_options})
+    
