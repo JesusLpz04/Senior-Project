@@ -1,85 +1,147 @@
-/* General Styles */
 body {
     margin: 0;
     padding: 0;
     background-color: #F8F5F0;
 }
 
-
-/* Box Container */
-.box-container {
+.signup-wrapper{
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
+    /* min-height: 100vh; */
+    padding-top: 30px;
 }
 
-.word-container {
+/* Ensure the containers are properly sized */
+.signup-container {
     display: flex;
-    gap: 150px;
+    justify-content: center;
+    align-self: start;
+    border-radius: 25px;
     background: #F8F5F0;
-    padding: 60px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ddd;
+    padding: 15px;
+    width: 1100px;
+    height: 700px;
+    margin-bottom: 30px;
+    box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Coming Soon Section */
-.coming-soon h1 {
-    font-size: 40px;
-    color: #002D56;
+.graphic-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding-top: 2px;
+    object-fit: fill;
+    border-radius: 25px;
+}
+
+/* Image Styling */
+.graphic-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; /* Change to 'cover' if you want it to fill the entire space */
+    max-width: 600px; /* Adjust based on your preference */
+    max-height: 575px; /* Adjust based on your preference */
+    display: block;
+    padding: 2px;
+}
+
+.signup-form-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .signup-container {
+        justify-content: center;
+    }
+    
+    .graphic-container,
+    .signup-form-container {
+        width: 100%;
+    }
+}
+
+/* Fix the form layout */
+.signup-form {
+    width: 100%;
+    max-width: 400px;
+    padding-top: 20px;
+}
+
+.signup-form form {
+    width: 100%;
+}
+
+.signup-form h1 {
+    font-size: 2rem;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
-.coming-soon span {
-    text-decoration: underline;
+.signup-form p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 20px;
 }
 
-.coming-soon p {
-    font-size: 14px;
+/* Form Inputs */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.input-group label {
+    font-size: 0.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-color: #2a668b;
+}
+
+/* Password Visibility Icon */
+#re-passowrd-input,
+#password-input {
+    position: relative;
+}
+
+#re-passowrd-input,
+#password-input input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+#re-password-input,
+#password-input .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 1.2rem;
     color: #666;
 }
 
-/* Signup Form */
-.signup-form {
-    background: #F8F5F0;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
-}
-
-.signup-form h3 {
-    font-size: 16px;
-    color: #999;
-}
-
-/* Name Fields */
-.name-fields {
-    display: flex;
-    gap: 10px;
-}
-
-.name-fields div {
-    flex: 1;
-}
-
-.signup-form label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.signup-form input {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Role Selection */
+/* Role Selection  */
 .role-selection {
     display: flex;
     gap: 10px;
@@ -91,20 +153,22 @@ body {
     font-size: 14px;
 }
 
-/* Button */
-.btn {
+/* Sign In Button */
+.signup-btn {
     width: 100%;
-    background-color: #002D56;
+    margin-top: 10px;
+    padding: 12px;
+    background-color: #053C5E;
     color: white;
-    padding: 10px;
-    margin-top: 15px;
+    font-size: 1rem;
+    font-weight: bold;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: background 0.3s;
 }
 
-.btn:hover {
-    background-color: #004080;
+.signup-btn:hover {
+    background-color: #2a668b;
 }
-
 
