@@ -25,9 +25,9 @@
           <!-- Side Menu -->
           <div id="side-menu" class="side-menu">
               <a href="#" class="close-btn" onclick="closeMenu()">&times;</a>
-              <a href="#">Manage Org.</a>
-              <a href="#">Treasury Tickets</a>
-              <a href="#">Budget Review</a>
+              <a href="{% url 'manageOrg' %}">Manage Org.</a>
+              <a href="{% url 'treasuryTickets' %}">Treasury Tickets</a>
+              <a href="{% url 'budgetReview' %}">Budget Review</a>
           </div>
 
           <!-- Logo -->
@@ -42,10 +42,10 @@
     <nav class="py-2 bg-body-tertiary border-bottom">
         <div class="container d-flex flex-wrap">
             <ul class="nav me-auto">
-                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2" aria-current="page">Dashboard</a></li>
-                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Expenses</a></li>
-                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Voting</a></li>
-                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">Marketplace</a></li>
+                <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link link-body-emphasis px-2" aria-current="page">Dashboard</a></li>
+                <li class="nav-item"><a href="{% url 'expenses' %}" class="nav-link link-body-emphasis px-2">Expenses</a></li>
+                <li class="nav-item"><a href="{% url 'voting' %}" class="nav-link link-body-emphasis px-2">Voting</a></li>
+                <li class="nav-item"><a href="{% url 'marketplace' %}" class="nav-link link-body-emphasis px-2">Marketplace</a></li>
                 <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li>
             </ul>
         </div>

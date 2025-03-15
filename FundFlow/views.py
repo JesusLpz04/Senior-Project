@@ -21,4 +21,31 @@ def landing_page(request):
 def register_org(request):
     dropdown_options = ["Org 1", "Org 2", "Org 3"]  #Hardcoded data for now 
     return render(request, "registerorg.html", {"options": dropdown_options})
-    
+
+def dashboard_view(request):
+    template = loader.get_template('dashboard.html')
+    return HttpResponse(template.render())
+
+def expenses_view(request):
+    template = loader.get_template('expenses.html')
+    return HttpResponse(template.render())
+     
+def voting_view(request):
+    template = loader.get_template('voting.html')
+    return HttpResponse(template.render())  
+
+def marketplace_view(request):
+    template = loader.get_template('marketplace.html')
+    return HttpResponse(template.render()) 
+
+def manageOrg_view(request):
+    template = loader.get_template('manageOrg.html')
+    return HttpResponse(template.render())
+
+def treasuryTickets_view(request):
+    template = loader.get_template('treasuryTickets.html')
+    return HttpResponse(template.render())
+
+def budgetReview_view(request):
+    template = loader.get_template('budgetReview.html')
+    return HttpResponse(template.render())

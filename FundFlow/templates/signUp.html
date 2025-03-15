@@ -1,66 +1,66 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FundFlow Sign Up</title>
 </head>
-<body>
 
-    <!-- Main Content -->
-    <div class="box-container">
-        <div class="word-container">
-            <div class="coming-soon">
-                <h1>Coming <span>SOON.</span></h1>
-                <p>STAY TUNED</p>
-            </div>
+<main class="signin-wrapper">
+    <div class="signin-container">
+        <!-- Left Side - Graphic Placeholder -->
+        <div class="graphic-container">
+            <img src="static/images/fundflow_graphic.jpg" alt="Logo">
+        </div>
 
-            <!-- Sign Up Form -->
+        <!-- Right Side - Sign Up Form -->
+        <div class="signup-form-container">
             <div class="signup-form">
-                <h3>Create Profile</h3>
-
-                <div class="name-fields">
-                    <div>
+                <h1>Sign Up!</h1>
+                <p>Sign up with your UTRGV credentials</p>
+                <form>
+                    <div class="input-group">
                         <label for="first-name">NAME</label>
                         <input type="text" id="first-name" placeholder="First Name">
                     </div>
-                    <div>
+                    <div class="input-group">
                         <label for="last-name">LAST NAME</label>
                         <input type="text" id="last-name" placeholder="Last Name">
                     </div>
-                </div>
+                    <div class="input-group">
+                        <label for="email">EMAIL</label>
+                        <input type="email" id="email" placeholder="Email">
+                    </div>
+                    <div class="input-group">
+                        <label for="password">PASSWORD</label>
+                        <input type="password" id="password" placeholder="Password">
+                    </div>
+                    <div class="input-group">
+                        <label for="re-password">RE-ENTER PASSWORD</label>
+                        <input type="password" id="re-password" placeholder="Re-enter password">
+                    </div>
+                    <div class="input-group">
+                        <label for="organization">NAME OF ORGANIZATION/CLUB</label>
+                        <input type="text" id="organization" placeholder="Organization/Club Name">
+                    </div>
+                    <div class="input-group">
+                        <label>WHAT IS YOUR ROLE?</label>
+                        <div class="role-selection">
+                            <input type="radio" id="president" name="role" value="President" checked>
+                            <label for="president">President</label>
+                            
+                            <input type="radio" id="treasurer" name="role" value="Treasurer">
+                            <label for="treasurer">Treasurer</label>
 
-                <label for="email">EMAIL</label>
-                <input type="email" id="email" placeholder="Email">
-                
-                <label for="password">PASSWORD</label>
-                <input type="password" id="password" placeholder="Password">
-
-                <label for="re-password">RE-ENTER PASSWORD</label>
-                <input type="password" id="re-password" placeholder="Re-enter password">
-
-                <label for="organization">NAME OF ORGANIZATION/CLUB</label>
-                <input type="text" id="organization" placeholder="Organization/Club Name">
-
-                <label>WHAT IS YOUR ROLE?</label>
-                <div class="role-selection">
-                    <input type="radio" id="president" name="role" value="President" checked>
-                    <label for="president">President</label>
-
-                    <input type="radio" id="treasurer" name="role" value="Treasurer">
-                    <label for="treasurer">Treasurer</label>
-
-                    <input type="radio" id="member" name="role" value="Member">
-                    <label for="member">Member</label>
-                </div>
-
-                <button class="btn">Create Profile</button>
+                            <input type="radio" id="member" name="role" value="Member">
+                            <label for="member">Member</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="signup-btn">Create Profile</button>
+                </form>
             </div>
         </div>
-    </div>
-
-</body>
-</html>
-{%endblock%}
+    </div> 
+</main>
+{% endblock %}
