@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
+
+from .forms import CreatePollForm
+from .models import Poll
 
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
@@ -30,10 +33,61 @@ def expenses_view(request):
     template = loader.get_template('expenses.html')
     return HttpResponse(template.render())
      
+# Voting page views
 def voting_view(request):
-    template = loader.get_template('voting.html')
-    return HttpResponse(template.render())  
+    polls = Poll.objects.all()
+    context = {
+        'polls' : polls
+    }
+    template = loader.get_template('voting/voting.html')
+    return HttpResponse(template.render(context, request)) 
 
+def createPoll_view(request):
+    if request.method == 'POST':
+        form = CreatePollForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('voting')
+    else:
+        form = CreatePollForm()
+    context = {
+        'form' : form
+    }
+    template = loader.get_template('voting/createPoll.html')
+    return HttpResponse(template.render(context, request))
+
+def voteForPoll_view(request, poll_id):
+    poll = Poll.objects.get(pk=poll_id)
+    
+    if request.method == 'POST':
+        selected_option = request.POST['poll']
+        if selected_option == 'option1':
+            poll.option_one_count += 1
+        elif selected_option == 'option2':
+            poll.option_two_count += 1
+        elif selected_option == 'option3':
+            poll.option_three_count += 1
+        else:
+            return HttpResponse(400, 'Invalid Form')
+    
+        poll.save()
+
+        return redirect('resultsPoll', poll.id)
+
+    context = {
+        'poll' : poll
+    }
+    template = loader.get_template('voting/voteForPoll.html')
+    return HttpResponse(template.render(context, request))
+
+def resultsPoll_view(request, poll_id):
+    poll = Poll.objects.get(pk=poll_id)
+    context = {
+        'poll' : poll
+    }
+    template = loader.get_template('voting/resultsPoll.html')
+    return HttpResponse(template.render(context, request)) 
+# End of voting page views
 def marketplace_view(request):
     template = loader.get_template('marketplace.html')
     return HttpResponse(template.render()) 
