@@ -1,23 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="row">
+<div class="voting-row">
     <div class="col-lg-8 col-lg-offset-2">
-        <div class="panel panel-default">
+        <div class="panel voting-panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Available Polls</h3>
+                <h3 class="panel-title">Active Polls</h3>
+                <span class="createPoll">
+                    <a href="{% url 'createPoll' %}" class="createPoll-btn btn-info btn-xs">Create New Poll</a> &nbsp;
+                </span>
             </div>
-            <span class="createPoll-btn">
-                <a href="{% url 'createPoll' %}" class="btn btn-info btn-xs">Create New Poll</a> &nbsp;
-            </span>
                 
-            <ul class="list-group">
+            <ul class="poll-list-group">
                 {% for poll in polls %}
-                <li class="list-group-item">
-                    <strong>{{ poll.question }}</strong>
+                <li class="poll-list-item">
+                    <strong class="poll-question">{{ poll.question }}</strong>
                     <span class="pull-right">
-                        <a href="{% url 'voteForPoll' poll.id %}" class="btn btn-info btn-xs">Vote</a> &nbsp;
-                        <a href="{% url 'resultsPoll' poll.id %}" class="btn btn-default btn-xs">View Results</a> &nbsp;
+                        <a href="{% url 'voteForPoll' poll.id %}" class="vote-btn btn-info btn-xs">Vote</a> &nbsp;
+                        <a href="{% url 'resultsPoll' poll.id %}" class="results-btn btn-default btn-xs">View Results</a> &nbsp;
                     </span>
                 </li>
                 {% endfor %}
