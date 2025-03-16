@@ -6,14 +6,18 @@ urlpatterns = [
     path('fundflow/', views.fund_flow, name='FundFlow'),
     #path for home, which is the login page
     path('', views.home_logIn, name='home'),
-    #path for signing up page
     path('signup/', views.signup_view, name='signUp'),
     #path('logout/', views.logout_view, name='logout'),
     path('landingpage/', views.landing_page, name='landingpage'),
     path('registerorg/', views.register_org, name='registerorg'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('expenses/', views.expenses_view, name='expenses'),
+    #voting will have 3 views in total: create, vote, result
     path('voting/', views.voting_view, name='voting'),
+    path('createpoll/', views.createPoll_view, name='createPoll'),
+    path('voteforpoll/<poll_id>', views.voteForPoll_view, name='voteForPoll'),
+    path('resultspoll/<poll_id>', views.resultsPoll_view, name='resultsPoll'),
+    #end of voting views
     path('marketplace/', views.marketplace_view, name='marketplace'),
     path('manageOrg/', views.manageOrg_view, name='manageOrg'),
     path('treasuryTickets/', views.treasuryTickets_view, name='treasuryTickets'),
