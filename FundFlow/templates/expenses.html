@@ -1,5 +1,54 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Expenses</h1>
+
+<div class = "tickets-info-container">
+    <div class="tickets-text-container">
+        <label id="tickets-subtitle-label">
+            Tickets
+        </label>
+        <label id="tickets-text-label">
+            Tickets should be created to log previously approved and completed
+            use of the organizations funds. 
+        </label>
+        <a id="create-ticket-btn-label" href="{% url 'createticket' %}">
+            <button class="create-ticket-btn" >+ create ticket</button>
+        </a> 
+    </div>
+</div>
+
+<div class = "tickets-info-container">
+    <div class="tickets-text-container">
+        <label id="tickets-subtitle-label">
+            Log History
+        </label>
+    </div>
+    <div class = "log-info-container">
+        <label id = "log-text-label">
+            Current Balance: $[BALANCE_VALUE]
+        </label>
+        <table class= "log-table">
+            <thead>
+                <tr>
+                    <th>Balance</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Confirmation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.balance }}</td>
+                    <td>{{ ticket.amount }}</td>
+                    <td>{{ ticket.date }}</td>
+                    <td>{{ ticket.confirmation }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
 {%endblock%}

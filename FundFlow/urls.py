@@ -12,6 +12,7 @@ urlpatterns = [
     path('registerorg/', views.register_org, name='registerorg'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('expenses/', views.expenses_view, name='expenses'),
+    path('createticket/', views.createticket_view, name='createticket'),
     #voting will have 3 views in total: create, vote, result
     path('voting/', views.voting_view, name='voting'),
     path('createpoll/', views.createPoll_view, name='createPoll'),
