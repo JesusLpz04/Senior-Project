@@ -1,5 +1,71 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Dashboard</h1>
-{%endblock%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FundFlow</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <main>
+    {% comment %} hard coded: later create model for orgs list  {% endcomment %}
+        <div class="org-section">
+            <label id="get-started">Get started...</label>
+            <div class="info-container">
+                <div class="text-container">
+                    <label id="subtitle-label">Follow your orgs!</label>
+                    <label for="text-label">Search for your org:</label>
+                    <input type="text" id="text-label" placeholder="Search...">
+                    <p>Or browse by name:</p>
+                    <div class="org-grid">
+                        <div class="org-item">Org 1</div>
+                        <div class="org-item">Org 2</div>
+                        <div class="org-item">Org 3</div>
+                        <div class="org-item">Org 4</div>
+                        <div class="org-item">Org 5</div>
+                        <div class="org-item">Org 6</div>
+                        <div class="org-item">Org 7</div>
+                        <div class="org-item">Org 8</div>
+                    </div>
+                    <div class="org-grid hidden" id="extra-orgs">
+                        <div class="org-item">Org 9</div>
+                        <div class="org-item">Org 10</div>
+                        <div class="org-item">Org 11</div>
+                        <div class="org-item">Org 12</div>
+                    </div>
+                    <div class="expand" id="expand-btn">Expand list</div>
+                </div>
+            </div>
+            <div class = "info-container">
+                <div class="text-container">
+                    <label id="subtitle-label">Register your student organizations!</label>
+                    <ul class="list-text-container">
+                        <li>Organizations must be registered officially on vLink.</li>
+                        <li>Only organization Presidents may register their organization.</li>
+                    </ul>    
+                    <a href="{% url 'registerorg' %}">
+                        <button class="register-btn" >Register</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('expand-btn').addEventListener('click', function() {
+            const extraOrgs = document.getElementById('extra-orgs');
+            if (extraOrgs.classList.contains('hidden')) {
+                extraOrgs.classList.remove('hidden');
+                this.textContent = 'Collapse list';
+            } else {
+                extraOrgs.classList.add('hidden');
+                this.textContent = 'Expand list';
+            }
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
