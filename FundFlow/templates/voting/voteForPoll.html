@@ -3,11 +3,11 @@
 {% block title %}Vote{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="voting-row">
     <div class="col-lg-8 col-lg-offset-2">
-        <div class="panel panel-default">
+        <div class="panel vote-panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Cast Your Vote</h3>
+                <h3 class="panel-title">Cast Your Vote!</h3>
             </div>
 
             <div class="panel-body">
@@ -23,7 +23,7 @@
 
                         <form method="POST">
                             {% csrf_token %}
-                            <div class="form-group">
+                            <div class="radio-options-form-group">
                                 <div class="radio">
                                     <label>
                                         <input type="radio" name="poll" value="option1" required>
@@ -42,7 +42,7 @@
                             
                             <hr />
 
-                            <button type="submit" class="btn btn-info">
+                            <button type="submit" class="votePoll-btn btn-info">
                                 Vote
                             </button>
                         </form>
