@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 
-from .forms import CreatePollForm
-from .models import Poll
+from .forms import CreatePollForm, CreateTicketForm
+from .models import Poll, CreateTicket
 
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
@@ -30,9 +30,20 @@ def dashboard_view(request):
     return HttpResponse(template.render())
 
 def expenses_view(request):
-    template = loader.get_template('expenses.html')
-    return HttpResponse(template.render())
-     
+    tickets = CreateTicket.objects.all()  #grab updated tickets for log display
+    return render(request, 'expenses.html', {'tickets': tickets}) 
+
+def createticket_view(request):
+    if request.method == "POST":
+        form = CreateTicketForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('expenses')  
+    else:
+        form = CreateTicketForm()
+    
+    return render(request, 'createticket.html', {'form': form})
+
 # Voting page views
 def voting_view(request):
     polls = Poll.objects.all()
