@@ -23,3 +23,9 @@ class CreateTicket(models.Model):
     def __str__(self):
         return f"Ticket created {self.id}: {self.amount} on {self.date}"
 
+class Balance(models.Model):
+    balance= models.DecimalField(max_digits=10, decimal_places=2)
+    add =  models.DecimalField(max_digits=10, decimal_places=2)
+    sub=  models.DecimalField(max_digits=10, decimal_places=2)
+    def total(self):
+        return self.balance

@@ -4,6 +4,7 @@ from django.template import loader
 
 from .forms import CreatePollForm, CreateTicketForm
 from .models import Poll, CreateTicket
+import json
 
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
@@ -108,5 +109,28 @@ def treasuryTickets_view(request):
     return HttpResponse(template.render())
 
 def budgetReview_view(request):
-    template = loader.get_template('budgetReview.html')
-    return HttpResponse(template.render())
+
+    expenses = {"dues": 1200, "Food": 500, "merch": 200, "utilities": 150}
+
+
+    labels = ', '.join(f'"{label}"' for label in expenses.keys()) 
+    values = ', '.join(str(value) for value in expenses.values())  
+
+    script = f"""
+    var ctx = document.getElementById('budgetChart').getContext('2d');
+    new Chart(ctx, {{
+        type: 'pie',
+        data: {{
+            labels: [{labels}],
+            datasets: [{{
+                data: [{values}],
+                backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56', '#4bc0c0', '#9966ff']
+            }}]
+        }}
+    }});
+    """
+
+    return render(request, 'budgetReview.html', {"chart_script": script})
+    # template = loader.get_template('budgetReview.html')
+    # return HttpResponse(template.render())
+
