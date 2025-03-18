@@ -6,15 +6,10 @@ from django.contrib.auth.models import User
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(max_length=254, required=True)
-    user_type = forms.ChoiceField(
-        choices=UserProfile.USER_TYPES,
-        required=True,
-        widget=forms.RadioSelect
-    )
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2', 'user_type')
+        fields = ('first_name', 'last_name', 'email', 'password1', 'password2')
         
 
 class CreatePollForm(ModelForm):

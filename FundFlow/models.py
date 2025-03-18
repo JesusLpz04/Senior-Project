@@ -14,6 +14,7 @@ class UserProfile(models.Model):
         User, #primary attributes of the default user are: username, password, email, first_name, last_name
         on_delete=models.CASCADE
     )
+    
     user_type = models.CharField(
         max_length=10, 
         choices=USER_TYPES

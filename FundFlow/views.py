@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_protect
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm
 from .models import Poll, CreateTicket, UserProfile
 from django.contrib.auth import login #,authenticate, logout
-from django.contrib.auth.models import Group #,User
+from django.contrib.auth.models import Group, User
 
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
@@ -26,17 +26,16 @@ def signup_view(request):
         if form.is_valid():
             user = form.save() # Create user instance 
 
-            # Automatically assign new users as members, can be changed later 
-            user_type =  'member'
-            group_name = 'Members' 
-            group, _ = Group.objects.get_or_create(name=group_name)
-            user.groups.add(group)
-            
             # Create associated UserProfile for user.
             UserProfile.objects.create(
                 user=user,
-                user_type=user_type
+                user_type='member'#default to member upon creation, can upgrade later
             )
+            
+            # Always assign new users as members
+            group = Group.objects.get_or_create(name='Members')
+            user.groups.add(group)
+            
 
             # Signup success message shown in Django admin.
             messages.success(request, 'Account created successfully!')
@@ -47,7 +46,7 @@ def signup_view(request):
         form = SignUpForm()
 
     context = {'form': form}
-    return render(request, 'signup.html', context)
+    return render(request, 'signUp.html', context)
 
 
 #later, will require login
