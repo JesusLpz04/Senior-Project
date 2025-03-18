@@ -2,9 +2,12 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 
-from .forms import CreatePollForm, CreateTicketForm
-from .models import Poll, CreateTicket
-import json
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_protect
+from .forms import CreatePollForm, CreateTicketForm, SignUpForm
+from .models import Poll, CreateTicket, UserProfile
+from django.contrib.auth import login #,authenticate, logout
+from django.contrib.auth.models import Group, User
 
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
@@ -13,9 +16,39 @@ def home_logIn(request):
     return render(request, 'home.html', {})
 
 
+# def signup_view(request):
+#     template = loader.get_template('signUp.html')
+#     return HttpResponse(template.render())
+
+@csrf_protect
 def signup_view(request):
-    template = loader.get_template('signUp.html')
-    return HttpResponse(template.render())
+    if request.method == 'POST':
+        form = SignUpForm(request.POST) # Reference the signupform form
+        if form.is_valid():
+            user = form.save() # Create user instance 
+
+            # Create associated UserProfile for user.
+            UserProfile.objects.create(
+                user=user,
+                user_type='member'#default to member upon creation, can upgrade later
+            )
+            
+            # Always assign new users as members
+            group = Group.objects.get_or_create(name='Members')
+            user.groups.add(group)
+            
+
+            # Signup success message shown in Django admin.
+            messages.success(request, 'Account created successfully!')
+            login(request, user)
+            
+            return redirect('dashboard')
+    else:
+        form = SignUpForm()
+
+    context = {'form': form}
+    return render(request, 'signUp.html', context)
+
 
 #later, will require login
 def register_org(request):
@@ -104,8 +137,8 @@ def manageOrg_view(request):
     template = loader.get_template('manageOrg.html')
     return HttpResponse(template.render())
 
-def treasuryTickets_view(request):
-    template = loader.get_template('treasuryTickets.html')
+def budgetRequests_view(request):
+    template = loader.get_template('budgetRequests.html')
     return HttpResponse(template.render())
 
 def budgetReview_view(request):
@@ -134,3 +167,7 @@ def budgetReview_view(request):
     # template = loader.get_template('budgetReview.html')
     # return HttpResponse(template.render())
 
+
+def sellGoodies_view(request):
+    template = loader.get_template('sellGoodies.html')
+    return HttpResponse(template.render())

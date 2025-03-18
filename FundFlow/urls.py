@@ -20,8 +20,10 @@ urlpatterns = [
     #end of voting views
     path('marketplace/', views.marketplace_view, name='marketplace'),
     path('manageOrg/', views.manageOrg_view, name='manageOrg'),
-    path('treasuryTickets/', views.treasuryTickets_view, name='treasuryTickets'),
+    path('budgetRequests/', views.budgetRequests_view, name='budgetRequests'),
     path('budgetReview/', views.budgetReview_view, name='budgetReview'),
+    path('sellGoodies/', views.sellGoodies_view, name='sellGoodies'),
+
 
     
 ]

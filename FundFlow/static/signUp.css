@@ -118,41 +118,6 @@ body {
     border-color: #2a668b;
 }
 
-/* Password Visibility Icon */
-#re-passowrd-input,
-#password-input {
-    position: relative;
-}
-
-#re-passowrd-input,
-#password-input input {
-    width: 100%;
-    padding-right: 40px;
-}
-
-#re-password-input,
-#password-input .toggle-password {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 1.2rem;
-    color: #666;
-}
-
-/* Role Selection  */
-.role-selection {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 5px;
-}
-
-.role-selection label {
-    font-size: 14px;
-}
-
 /* Sign In Button */
 .signup-btn {
     width: 100%;
