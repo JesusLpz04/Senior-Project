@@ -136,10 +136,14 @@ def manageOrg_view(request):
     template = loader.get_template('manageOrg.html')
     return HttpResponse(template.render())
 
-def treasuryTickets_view(request):
-    template = loader.get_template('treasuryTickets.html')
+def budgetRequests_view(request):
+    template = loader.get_template('budgetRequests.html')
     return HttpResponse(template.render())
 
 def budgetReview_view(request):
     template = loader.get_template('budgetReview.html')
+    return HttpResponse(template.render())
+
+def sellGoodies_view(request):
+    template = loader.get_template('sellGoodies.html')
     return HttpResponse(template.render())
