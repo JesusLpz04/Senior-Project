@@ -1,15 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Create Ticket</h1>
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <a href="{% url 'expenses' %}">
-        <button type="submit" > submit</button>
-    </a> 
-</form>
+<div class="create-ticket-container">
+    <h1>Create Ticket</h1>
+
+    <form method="POST" class="create-tickect-form">
+        {% csrf_token %}
+        {{ form.as_p}}
+        <a href="{% url 'expenses' %}">
+            <button type="submit" > submit</button>
+        </a> 
+    </form>
+</div>
+
 
 
 
