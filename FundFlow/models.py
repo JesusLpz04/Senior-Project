@@ -1,6 +1,27 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
+class UserProfile(models.Model):
+    USER_TYPES = [
+        ('president', 'President'),
+        ('treasurer', 'Treasurer'), 
+        ('member', 'Member')
+    ]
+    
+    # One user correlates to one user profile.
+    user = models.OneToOneField(
+        User, #primary attributes of the default user are: username, password, email, first_name, last_name
+        on_delete=models.CASCADE
+    )
+    
+    user_type = models.CharField(
+        max_length=10, 
+        choices=USER_TYPES
+    )
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.user_type}"
 
 class Poll(models.Model):
     question = models.TextField()

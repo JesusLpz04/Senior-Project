@@ -9,6 +9,7 @@
 
 <main class="signup-wrapper">
     <div class="signup-container">
+        
         <!-- Left Side - Graphic Placeholder -->
         <div class="graphic-container">
             <img src="static/images/fundflow_graphic.jpg" alt="Logo">
@@ -19,48 +20,94 @@
             <div class="signup-form">
                 <h1>Sign Up!</h1>
                 <p>Sign up with your UTRGV credentials</p>
-                <form>
-                    <div class="input-group">
-                        <label for="first-name">NAME</label>
-                        <input type="text" id="first-name" placeholder="First Name">
-                    </div>
-                    <div class="input-group">
-                        <label for="last-name">LAST NAME</label>
-                        <input type="text" id="last-name" placeholder="Last Name">
-                    </div>
-                    <div class="input-group">
-                        <label for="email">EMAIL</label>
-                        <input type="email" id="email" placeholder="Email">
-                    </div>
-                    <div class="input-group">
-                        <label for="password">PASSWORD</label>
-                        <input type="password" id="password" placeholder="Password">
-                    </div>
-                    <div class="input-group">
-                        <label for="re-password">RE-ENTER PASSWORD</label>
-                        <input type="password" id="re-password" placeholder="Re-enter password">
-                    </div>
-                    <div class="input-group">
-                        <label for="organization">NAME OF ORGANIZATION/CLUB</label>
-                        <input type="text" id="organization" placeholder="Organization/Club Name">
-                    </div>
-                    <div class="input-group">
-                        <label>WHAT IS YOUR ROLE?</label>
-                        <div class="role-selection">
-                            <input type="radio" id="president" name="role" value="President" checked>
-                            <label for="president">President</label>
-                            
-                            <input type="radio" id="treasurer" name="role" value="Treasurer">
-                            <label for="treasurer">Treasurer</label>
-
-                            <input type="radio" id="member" name="role" value="Member">
-                            <label for="member">Member</label>
+                <form method="POST" action="">
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
                         </div>
+                    {% endif %}
+
+                    <div class="input-group">
+                        <label for="id_first_name">FIRST NAME</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="alert alert-danger mt-1">
+                                {{ form.first_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="input-group">
+                        <label for="id_last_name">LAST NAME</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="alert alert-danger mt-1">
+                                {{ form.last_name.errors }}
+                            </div>
+                        {% endif %}
+                    </div>                    
+
+                    <div class="input-group">
+                        <label for="id_email">EMAIL</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="alert alert-danger mt-1">
+                                {{ form.email.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="input-group">
+                        <label for="id_password1">PASSWORD</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="alert alert-danger mt-1">
+                                {{ form.password1.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="id_password2">RE-ENTER PASSWORD</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="alert alert-danger mt-1">
+                                {{ form.password2.errors }}
+                            </div>
+                        {% endif %}
                     </div>
                     <button type="submit" class="signup-btn">Create Profile</button>
                 </form>
             </div>
         </div>
-    </div> 
+    </div>
 </main>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // replaced input placeholders
+        let placeholders = {
+            "id_first_name": "First Name",
+            "id_last_name": "Last Name",
+            "id_email": "Email",
+            "id_password1": "Enter Password",
+            "id_password2": "Re-enter Password"
+        };
+
+        // Add the 'form-control' class to form fields
+        Object.keys(placeholders).forEach(id => {
+            let field = document.getElementById(id);
+            if (field) {
+                field.placeholder = placeholders[id];
+                field.classList.add("form-control");
+            }
+        });
+    });
+</script>
+
 {% endblock %}
