@@ -19,9 +19,10 @@ class CreatePollForm(ModelForm):
         
 
 class CreateTicketForm(ModelForm):
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'})) 
+    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}))
+    receipt = forms.FileField(required=False, widget=forms.FileInput(attrs={'accept': 'image/jpeg,image/png,application/pdf'}))
 
     class Meta:
         model = CreateTicket
-        fields = ['balance', 'amount', 'date', 'confirmation']
+        fields = ['balance', 'amount', 'date', 'confirmation', 'receipt']
     

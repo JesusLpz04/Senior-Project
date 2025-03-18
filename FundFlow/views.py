@@ -63,15 +63,15 @@ def expenses_view(request):
     return render(request, 'expenses.html', {'tickets': tickets}) 
 
 def createticket_view(request):
-    if request.method == "POST":
-        form = CreateTicketForm(request.POST)
+    if request.method == 'POST':
+        form = CreateTicketForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('expenses')  
+            return redirect('expenses')
     else:
         form = CreateTicketForm()
-    
-    return render(request, 'createticket.html', {'form': form})
+
+    return render(request, 'createTicket.html', {'form': form})
 
 # Voting page views
 def voting_view(request):

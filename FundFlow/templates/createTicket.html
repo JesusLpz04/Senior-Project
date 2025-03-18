@@ -1,20 +1,19 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
+<div class="popup-overlay">
+    <div class="create-ticket-popup">
+        <h1>Create Ticket</h1>
 
-<div class="create-ticket-container">
-    <h1>Create Ticket</h1>
-
-    <form method="POST" class="create-tickect-form">
-        {% csrf_token %}
-        {{ form.as_p}}
-        <a href="{% url 'expenses' %}">
-            <button type="submit" > submit</button>
-        </a> 
-    </form>
+        <form method="POST" class="create-ticket-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Submit</button>
+                <a href="{% url 'expenses' %}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
-
-
-
-
-{%endblock%}
+{% endblock %}
