@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Manage Org</h1>
-{%endblock%}
+<div class="container2">
+    <h2>Manage Organization</h2>
+    <div class="buttons">
+        <button class="pending-btn"><i class="fas fa-filter"></i> Pending</button>
+    </div>
+    
+    <!-- Name Container (Without Input) -->
+    <div class="name-container">
+        <span class="name-display">Joe Monroe</span>
+        <button class="active-btn">Active</button>
+    </div>
+</div>
+
+{% endblock %}
