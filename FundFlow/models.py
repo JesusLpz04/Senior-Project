@@ -40,6 +40,7 @@ class CreateTicket(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()  
     confirmation = models.CharField(max_length=100)
+    receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
 
     def __str__(self):
         return f"Ticket created {self.id}: {self.amount} on {self.date}"
