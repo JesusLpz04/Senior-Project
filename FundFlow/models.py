@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum, F, Case, When, DecimalField
 from django.contrib.auth.models import User
 
 # Create your models here.
@@ -35,13 +36,68 @@ class Poll(models.Model):
     def total(self):
         return self.option_one_count + self.option_two_count + self.option_three_count
 
-class CreateTicket(models.Model):
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()  
-    confirmation = models.CharField(max_length=100)
-    receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
+#for the drop down menu of category types
+class CustomCategory(models.Model):
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return f"Ticket created {self.id}: {self.amount} on {self.date}"
+        return self.name
+    
+class TicketManager(models.Manager):
+    def get_balance(self):
+        return self.aggregate(
+            total=Sum(
+                Case(
+                    When(operation='add', then=F('amount')),
+                    When(operation='minus', then=-F('amount')),
+                    default=0,
+                    output_field=DecimalField()
+                )
+            )
+        )['total'] or 0
+    #call like:
+    #balance = CreateTicket.objects.get_balance()
+        
+class CreateTicket(models.Model):
+    CATEGORY_CHOICES = [
+        ('supplies', 'Supplies'), 
+        ('reimbursements', 'Reimbursements'), 
+        ('food', 'Food'), 
+        ('travel', 'Travel'),
+        ('membershipfee', 'Membership Fee'),
+        ('other', 'Other'),
+    ]
+    MODIFY_CHOICES = [
+        ('add', '+'), 
+        ('minus', '-')        
+    ]
+    
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField()  
+    operation = models.CharField(
+        max_length = 20, 
+        choices = MODIFY_CHOICES,
+        default = 'add',
+    )
+    expense_category = models.CharField(
+        max_length=20, 
+        choices=CATEGORY_CHOICES, 
+        default = 'supplies',
+    ) 
+    custom_category = models.ForeignKey(
+        CustomCategory, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )   
+    receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
+    objects = TicketManager()
+    
+    def save(self, *args, **kwargs):
+        if self.expense_category == 'other' and self.custom_category: #if already exists
+            self.custom_category, _ = CustomCategory.objects.get_or_create(name=self.custom_category.name)#reuse
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Ticket {self.id} created ({self.date}), balance: ${self.__class__.objects.get_balance()}"
 

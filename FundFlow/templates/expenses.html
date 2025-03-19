@@ -25,7 +25,7 @@
     </div>
     <div class = "log-info-container">
         <label id = "log-text-label">
-            Current Balance: $[BALANCE_VALUE]
+            Current Balance: ${{balance|floatformat:2 }}
         </label>
         <table class= "log-table">
             <thead>
@@ -33,17 +33,17 @@
                     <th>Balance</th>
                     <th>Amount</th>
                     <th>Date</th>
-                    <th>Confirmation</th>
+                    <th>Expense Category</th>
                     <th>Receipt</th>
                 </tr>
             </thead>
             <tbody>
                 {% for ticket in tickets %}
                 <tr>
-                    <td>{{ ticket.balance }}</td>
+                    <td>{{ balance|floatformat:2  }}</td>
                     <td>{{ ticket.amount }}</td>
                     <td>{{ ticket.date }}</td>
-                    <td>{{ ticket.confirmation }}</td>
+                    <td>{{ ticket.expense_category }}</td>
                     <td>
                         {% if ticket.receipt %}
                             <a href="#" class="receipt-link" data-receipt="{{ ticket.receipt.url }}">View Receipt</a>

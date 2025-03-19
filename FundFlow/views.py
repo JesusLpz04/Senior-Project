@@ -4,7 +4,7 @@ from django.template import loader
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm
-from .models import Poll, CreateTicket, UserProfile
+from .models import Poll, CreateTicket, UserProfile, CustomCategory, TicketManager
 from django.contrib.auth import login #,authenticate, logout
 from django.contrib.auth.models import Group, User
 
@@ -13,11 +13,6 @@ def fund_flow(request):
 
 def home_logIn(request):
     return render(request, 'home.html', {})
-
-
-# def signup_view(request):
-#     template = loader.get_template('signUp.html')
-#     return HttpResponse(template.render())
 
 @csrf_protect
 def signup_view(request):
@@ -60,18 +55,26 @@ def dashboard_view(request):
 
 def expenses_view(request):
     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
-    return render(request, 'expenses.html', {'tickets': tickets}) 
+    balance = CreateTicket.objects.get_balance()     
+    return render(request, 'expenses.html', {'tickets': tickets, 'balance':balance}) 
 
 def createticket_view(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = CreateTicketForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            ticket = form.save(commit=False)
+            
+            if ticket.expense_category == "other" and request.POST.get("new_custom_category"):
+                custom_category_name = request.POST["new_custom_category"]
+                custom_category = CustomCategory.objects.get_or_create(name=custom_category_name)
+                ticket.custom_category = custom_category
+            
+            ticket.save()
             return redirect('expenses')
     else:
         form = CreateTicketForm()
-
-    return render(request, 'createTicket.html', {'form': form})
+    
+    return render(request, "createTicket.html", {"form": form})
 
 # Voting page views
 def voting_view(request):
