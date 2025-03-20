@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Budget Review</h1>
-{%endblock%}
+<div class="container2">
+    <h1>Budget Review</h1>
+    <canvas id="budgetChart"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+
+    <script>
+        {{ chart_script|safe }}
+    </script>
+</div>
+{% endblock %}
