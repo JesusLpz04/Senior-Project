@@ -19,9 +19,36 @@ class UserProfile(models.Model):
         max_length=10, 
         choices=USER_TYPES
     )
-    
+
     def __str__(self):
-        return f"{self.user.username} - {self.user_type}"
+        return f"{self.user.email} - {self.user_type}"
+class Organization(models.Model):
+    name= models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True, null=True)
+    #president = models.ForeignKey(User, on_delete=models.CASCADE, related_name='president_of')
+    members = models.ManyToManyField(User, related_name='organizations', blank=True)
+    pending_members = models.ManyToManyField(User, related_name='pending_organizations', blank=True)
+    
+    def request_membership(self, user):
+        if user not in self.members.all() and user not in self.pending_members.all():
+            self.pending_members.add(user)
+
+    def approve_membership(self, user):
+        if user in self.pending_members.all():
+            self.pending_members.remove(user)
+            self.members.add(user)
+
+    def deny_membership(self, user):
+        if user in self.pending_members.all():
+            self.pending_members.remove(user)
+
+    def get_pending_requests(self):
+        return self.pending_members.all()
+
+    def get_accepted_members(self):
+        return self.members.all()
+    def __str__(self):
+        return self.name
 
 class Poll(models.Model):
     question = models.TextField()

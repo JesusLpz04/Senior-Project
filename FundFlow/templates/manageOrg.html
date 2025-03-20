@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <div class="container2">
@@ -8,10 +9,16 @@
     </div>
     
     <!-- Name Container (Without Input) -->
+    {% for user in members %}
+    <form method="POST" class="active-form">
+        {% csrf_token %}
+        {{ form|crispy }}
     <div class="name-container">
-        <span class="name-display">Joe Monroe</span>
-        <button class="active-btn">Active</button>
+        <span class="name-display">{{ user.username }}</span>
+        <button class="active-btn" data-user-id="{{ user.id }}" name="user_id" value="{{user.id}}">Active</button>
     </div>
+    </form>
+    {% endfor %}
 </div>
 
 {% endblock %}

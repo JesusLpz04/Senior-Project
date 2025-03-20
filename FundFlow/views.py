@@ -5,7 +5,7 @@ from django.template import loader
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm
-from .models import Poll, CreateTicket, UserProfile
+from .models import Poll, CreateTicket, UserProfile, Organization
 from django.contrib.auth import login #,authenticate, logout
 from django.contrib.auth.models import Group, User
 
@@ -56,8 +56,12 @@ def register_org(request):
     return render(request, "registerorg.html", {"options": dropdown_options})
 
 def dashboard_view(request):
+    orgs= Organization.objects.all()
+    context = {
+        'orgs':orgs
+    }
     template = loader.get_template('dashboard.html')
-    return HttpResponse(template.render())
+    return HttpResponse(template.render(context))
 
 def expenses_view(request):
     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
@@ -130,12 +134,43 @@ def resultsPoll_view(request, poll_id):
     return HttpResponse(template.render(context, request)) 
 # End of voting page views
 def marketplace_view(request):
+
     template = loader.get_template('marketplace.html')
     return HttpResponse(template.render()) 
 
 def manageOrg_view(request):
+    # for user in User:
+    #     if user.username == "testdummy":
+    #         pres = user
+    # Organization.objects.create(
+    #     name="testOrg1",
+    #     description="This is a description of my new organization."
+    # )
+    orgs = Organization.objects.filter(name='testOrg1')
+    #users=User.objects.all()
+    for i in orgs:
+        orgs=i
+        print(i.name)
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        user = User.objects.get(pk=user_id)
+        print(user)
+        orgs.approve_membership(user)
+
+    # user = User.objects.filter(username='testdummy3')
+    # for i in user:
+    #     user = i
+    # print(user)
+    # print(orgs)
+    # orgs.request_membership(user)
+    members=orgs.pending_members.all()
+    context = {
+        'orgs' : orgs,
+        #'users' : users,
+        'members': members
+    }
     template = loader.get_template('manageOrg.html')
-    return HttpResponse(template.render())
+    return HttpResponse(template.render(context,request))
 
 def budgetRequests_view(request):
     template = loader.get_template('budgetRequests.html')
