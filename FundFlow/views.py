@@ -25,7 +25,7 @@ def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST) # Reference the signupform form
         if form.is_valid():
-            user = form.save() # Create user instance 
+            user = form.save() # Create user instance
 
             # Create associated UserProfile for user.
             UserProfile.objects.create(
@@ -56,12 +56,24 @@ def register_org(request):
     return render(request, "registerorg.html", {"options": dropdown_options})
 
 def dashboard_view(request):
+    # Organization.objects.create(
+    #     name="testOrg2",
+    #     description="This is a description of my new organization 2."
+    # )
+    current_user = request.user
+
+    print(current_user)
     orgs= Organization.objects.all()
     context = {
         'orgs':orgs
     }
-    template = loader.get_template('dashboard.html')
-    return HttpResponse(template.render(context))
+    if request.method == 'POST':
+        org_id = request.POST.get('org_id')
+        org = Poll.objects.get(pk=org_id)
+        return redirect('joinOrg', org.id)
+    # template = loader.get_template('dashboard.html')
+    # return HttpResponse(template.render(context))
+    return render(request, 'dashboard.html', context)
 
 def expenses_view(request):
     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
@@ -139,6 +151,7 @@ def marketplace_view(request):
     return HttpResponse(template.render()) 
 
 def manageOrg_view(request):
+    display=""
     # for user in User:
     #     if user.username == "testdummy":
     #         pres = user
@@ -146,28 +159,46 @@ def manageOrg_view(request):
     #     name="testOrg1",
     #     description="This is a description of my new organization."
     # )
-    orgs = Organization.objects.filter(name='testOrg1')
+    orgs = Organization.objects.filter(name='testOrg2')
     #users=User.objects.all()
     for i in orgs:
         orgs=i
         print(i.name)
+    membersLst=orgs.pending_members.all()
     if request.method == 'POST':
-        user_id = request.POST.get('user_id')
-        user = User.objects.get(pk=user_id)
-        print(user)
-        orgs.approve_membership(user)
+        form_type = request.POST.get('form_type')
+        if form_type == 'members' :
+            display = 'members'
+            membersLst=orgs.members.all()
 
-    # user = User.objects.filter(username='testdummy3')
+        if form_type == 'pending':
+            display ='pending'
+            membersLst=orgs.pending_members.all()
+
+        if form_type == 'remove':
+            display='members'
+            user_id = request.POST.get('members_user_id')
+            user = User.objects.get(pk=user_id)
+            orgs.members.remove(user)
+
+        if form_type == 'add':
+            display='pending'
+            user_id = request.POST.get('pending_user_id')
+            user = User.objects.get(pk=user_id)
+            print(user)
+            orgs.approve_membership(user)
+
+    # user = User.objects.filter(username='testdummy2')
     # for i in user:
     #     user = i
-    # print(user)
-    # print(orgs)
+
     # orgs.request_membership(user)
-    members=orgs.pending_members.all()
+ 
     context = {
         'orgs' : orgs,
         #'users' : users,
-        'members': members
+        'membersLst': membersLst,
+        'display': display
     }
     template = loader.get_template('manageOrg.html')
     return HttpResponse(template.render(context,request))
@@ -206,3 +237,17 @@ def budgetReview_view(request):
 def sellGoodies_view(request):
     template = loader.get_template('sellGoodies.html')
     return HttpResponse(template.render())
+
+def joinOrg_view(request,org_id):
+    org = Organization.objects.get(pk=org_id)
+
+    context={
+        'org':org
+    }
+    current_user= request.user
+    if request.method == 'POST':
+        org.request_membership(current_user)
+        return redirect('dashboard')
+
+
+    return render(request, 'joinOrg.html', context)

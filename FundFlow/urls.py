@@ -28,6 +28,8 @@ urlpatterns = [
     path('budgetRequests/', views.budgetRequests_view, name='budgetRequests'),
     path('budgetReview/', views.budgetReview_view, name='budgetReview'),
     path('sellGoodies/', views.sellGoodies_view, name='sellGoodies'),
+    #joining an org
+    path('joinOrganization/<org_id>', views.joinOrg_view, name='joinOrg'),
 
     
 ]
