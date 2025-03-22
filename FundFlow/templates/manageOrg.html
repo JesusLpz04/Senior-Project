@@ -1,5 +1,24 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<h1>Manage Org</h1>
-{%endblock%}
+<div class="container2">
+    <h2>Manage Organization</h2>
+    <div class="buttons">
+        <button class="pending-btn"><i class="fas fa-filter"></i> Pending</button>
+    </div>
+    
+    <!-- Name Container (Without Input) -->
+    {% for user in members %}
+    <form method="POST" class="active-form">
+        {% csrf_token %}
+        {{ form|crispy }}
+    <div class="name-container">
+        <span class="name-display">{{ user.username }}</span>
+        <button class="active-btn" data-user-id="{{ user.id }}" name="user_id" value="{{user.id}}">Active</button>
+    </div>
+    </form>
+    {% endfor %}
+</div>
+
+{% endblock %}
