@@ -15,39 +15,54 @@ def fund_flow(request):
 def home_logIn(request):
     return render(request, 'home.html', {})
 
-
-# def signup_view(request):
-#     template = loader.get_template('signUp.html')
-#     return HttpResponse(template.render())
-
 @csrf_protect
 def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST) # Reference the signupform form
+        
         if form.is_valid():
-            user = form.save() # Create user instance 
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password1']
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
 
-            # Create associated UserProfile for user.
-            UserProfile.objects.create(
-                user=user,
-                user_type='member'#default to member upon creation, can upgrade later
-            )
+            # Generate username from email
+            username = email.split('@')[0]
             
-            # Always assign new users as members
-            group = Group.objects.get_or_create(name='Members')
-            user.groups.add(group)
-            
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'A user with this email already exists.')  
+                return render(request, 'signUp.html', {'form': form})
 
-            # Signup success message shown in Django admin.
-            messages.success(request, 'Account created successfully!')
-            login(request, user)
             
-            return redirect('dashboard')
+            else:
+                # Create user instance 
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+
+                # Create UserProfile
+                UserProfile.objects.create(
+                    user=user,
+                    user_type='member'#default to member upon creation, can upgrade later
+                )
+
+                # Add to group
+                group, _ = Group.objects.get_or_create(name='Members') # Always assign new users as members
+                user.groups.add(group)
+
+                messages.success(request, 'Account created successfully!') #on django admin
+                login(request, user)
+                return redirect('dashboard')
     else:
         form = SignUpForm()
 
     context = {'form': form}
     return render(request, 'signUp.html', context)
+
 
 
 #later, will require login
