@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="{% static 'expenses.css' %}">
     <link rel="stylesheet" href="{% static 'budgetRev.css' %}">
     <link rel="stylesheet" href="{% static 'manageOrganization.css' %}">
-    
+    <link rel="stylesheet" href="{% static 'fundingRequests.css' %}">
   </head>
 
 
@@ -30,9 +30,8 @@
           <div id="side-menu" class="side-menu">
               <a href="#" class="close-btn" onclick="closeMenu()">&times;</a>
               <a href="{% url 'manageOrg' %}">Manage Org.</a>
-              <a href="{% url 'budgetRequests' %}">Budget Requests</a>
               <a href="{% url 'budgetReview' %}">Budget Review</a>
-              <a href="{% url 'sellGoodies' %}">Sell Goodies</a>
+              <a href="{% url 'manageMarketplace' %}">Manage Marketplace</a>
           </div>
 
           <!-- Logo -->
@@ -49,6 +48,7 @@
             <ul class="nav me-auto">
                 <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link link-body-emphasis px-2" aria-current="page">Dashboard</a></li>
                 <li class="nav-item"><a href="{% url 'expenses' %}" class="nav-link link-body-emphasis px-2">Expenses</a></li>
+                <li class="nav-item"><a href="{% url 'fundingRequests' %}" class="nav-link link-body-emphasis px-2">Funding Requests</a></li>
                 <li class="nav-item"><a href="{% url 'voting' %}" class="nav-link link-body-emphasis px-2">Voting</a></li>
                 <li class="nav-item"><a href="{% url 'marketplace' %}" class="nav-link link-body-emphasis px-2">Marketplace</a></li>
                 <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li>

@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="funding-row">
+    <div class="col-lg-8 col-lg-offset-2">
+        <div class="panel funding-panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Funding Requests</h3>
+                <p class="paragraph">
+                    <i>What are funding request?</i> <br>
+                    An easy and fast way for members to request 
+                    monetary support for a personal project that aligns and/or benefits the club or organization
+                </p>
+                <span class="requestFunds">
+                    <a href="#" class="requestFunds-btn btn-info btn-xs" id="openRequestForm">Request Funds</a> &nbsp;
+                </span>
+            </div>
+                
+            <ul class="requests-list-group" id="requestsList">
+                {% for request in funding_requests %}
+                <li class="requests-list-item">
+                    <strong class="request-subject">{{ request.subject }}</strong>
+                    <span class="pull-right status-badge status-{{ request.status }}">
+                        {{ request.get_status_display }}
+                    </span>
+                </li>
+                {% empty %}
+                <li class="requests-list-item empty-list">
+                    <em>No funding requests yet. Be the first to request!</em>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Pop-up Form -->
+<div id="requestFormModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Request Funds</h3>
+        <form id="fundingRequestForm" method="post" action="{% url 'create_funding_request' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" name="subject" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" class="form-control" rows="4" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="amount">Approximate Amount ($):</label>
+                <input type="number" id="amount" name="amount" class="form-control" min="0" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="link">Related Link (Optional):</label>
+                <input type="url" id="link" name="link" class="form-control" placeholder="https://example.com">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Modal elements
+        const modal = document.getElementById('requestFormModal');
+        const openBtn = document.getElementById('openRequestForm');
+        const closeBtn = document.querySelector('.close');
+        const form = document.getElementById('fundingRequestForm');
+    
+        // Open modal when clicking the Request Funds button
+        openBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            modal.style.display = 'block';
+        });
+    
+        // Close modal when clicking the X
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    
+        // Close modal when clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    
+        // Handle form submission using AJAX
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            
+            fetch('{% url "create_funding_request" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Add the new request to the list
+                    const requestsList = document.getElementById('requestsList');
+                    
+                    // Remove empty state message if it exists
+                    const emptyItem = requestsList.querySelector('.empty-list');
+                    if (emptyItem) {
+                        emptyItem.remove();
+                    }
+                    
+                    // Create new list item
+                    const listItem = document.createElement('li');
+                    listItem.className = 'requests-list-item';
+                    listItem.dataset.id = data.id;
+                    
+                    const subject = document.createElement('strong');
+                    subject.className = 'request-subject';
+                    subject.textContent = data.subject;
+                    
+                    const statusBadge = document.createElement('span');
+                    statusBadge.className = `pull-right status-badge status-${data.status}`;
+                    statusBadge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+                    
+                    listItem.appendChild(subject);
+                    listItem.appendChild(statusBadge);
+                    
+                    // Add to the beginning of the list
+                    if (requestsList.firstChild) {
+                        requestsList.insertBefore(listItem, requestsList.firstChild);
+                    } else {
+                        requestsList.appendChild(listItem);
+                    }
+                    
+                    // Reset form and close modal
+                    form.reset();
+                    modal.style.display = 'none';
+                } else {
+                    // Handle errors
+                    console.error('Form submission error:', data.errors);
+                    // Display errors to user (you could add more sophisticated error handling)
+                    alert('There was an error submitting your request. Please check all fields and try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting your request. Please try again.');
+            });
+        });
+    });
+</script>
+{% endblock %}
