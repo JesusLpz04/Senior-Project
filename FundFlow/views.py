@@ -53,10 +53,30 @@ def dashboard_view(request):
     template = loader.get_template('dashboard.html')
     return HttpResponse(template.render())
 
+
+from decimal import Decimal
 def expenses_view(request):
-    tickets = CreateTicket.objects.all()  #grab updated tickets for log display
-    balance = CreateTicket.objects.get_balance()     
-    return render(request, 'expenses.html', {'tickets': tickets, 'balance':balance}) 
+    tickets = CreateTicket.objects.all().order_by('date', 'id')  
+    balance = CreateTicket.objects.get_balance()
+    running_balance = Decimal('0.00')
+    ticket_data = []
+
+    for ticket in tickets:
+        amount = ticket.amount if ticket.operation == 'add' else -ticket.amount
+        running_balance += amount
+        ticket_data.append({
+            'ticket': ticket,
+            'balance': running_balance
+        })
+
+    return render(request, 'expenses.html', {
+        'tickets_with_balance': reversed(ticket_data),  # reverse for most recent first
+    }, {'balance': balance})
+
+# def expenses_view(request):
+#     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
+#     balance = CreateTicket.objects.get_balance()     
+#     return render(request, 'expenses.html', {'tickets': tickets, 'balance':balance}) 
 
 def createticket_view(request):
     if request.method == "POST":
