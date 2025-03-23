@@ -62,21 +62,19 @@ def expenses_view(request):
     ticket_data = []
 
     for ticket in tickets:
+        operation_symbol = '+' if ticket.operation == 'add' else '-'  
         amount = ticket.amount if ticket.operation == 'add' else -ticket.amount
         running_balance += amount
         ticket_data.append({
             'ticket': ticket,
-            'balance': running_balance
+            'balance': running_balance,
+            'operation_symbol': operation_symbol  
         })
 
     return render(request, 'expenses.html', {
-        'tickets_with_balance': reversed(ticket_data),  # reverse for most recent first
-    }, {'balance': balance})
-
-# def expenses_view(request):
-#     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
-#     balance = CreateTicket.objects.get_balance()     
-#     return render(request, 'expenses.html', {'tickets': tickets, 'balance':balance}) 
+    'tickets_with_balance': list(reversed(ticket_data)),  
+    'balance': balance  
+    })
 
 def createticket_view(request):
     if request.method == "POST":

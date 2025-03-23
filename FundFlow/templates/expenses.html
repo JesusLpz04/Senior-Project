@@ -12,7 +12,7 @@
             use of the organizations funds. 
         </label>
         <a id="create-ticket-btn-label" href="{% url 'createticket' %}">
-            <button class="create-ticket-btn" >+ create ticket</button>
+            <button class="create-ticket-btn" href="{% url 'createticket' %}" >+ create ticket</button>
         </a> 
     </div>
 </div>
@@ -38,15 +38,15 @@
                 </tr>
             </thead>
             <tbody>
-                {% for ticket in tickets %}
+                {% for item in tickets_with_balance %}
                 <tr>
-                    <td>{{ balance|floatformat:2  }}</td>
-                    <td>{{ ticket.amount }}</td>
-                    <td>{{ ticket.date }}</td>
-                    <td>{{ ticket.expense_category }}</td>
+                    <td>{{ item.balance|floatformat:2  }}</td>
+                    <td>{{ item.operation_symbol }} {{ item.ticket.amount }}</td>
+                    <td>{{ item.ticket.date }}</td>
+                    <td>{{ item.ticket.expense_category }}</td>
                     <td>
-                        {% if ticket.receipt %}
-                            <a href="#" class="receipt-link" data-receipt="{{ ticket.receipt.url }}">View Receipt</a>
+                        {% if item.ticket.receipt %}
+                            <a href="#" class="receipt-link" data-receipt="{{ item.ticket.receipt.url }}">View Receipt</a>
                         {% else %}
                             No receipt
                         {% endif %}
