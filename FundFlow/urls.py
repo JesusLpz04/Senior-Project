@@ -25,9 +25,10 @@ urlpatterns = [
     #end of voting views
     path('marketplace/', views.marketplace_view, name='marketplace'),
     path('manageOrg/', views.manageOrg_view, name='manageOrg'),
-    path('budgetRequests/', views.budgetRequests_view, name='budgetRequests'),
+    path('fundingRequests/', views.fundingRequests_view, name='fundingRequests'),
+    path('fundingRequests/create/', views.create_funding_request, name='create_funding_request'),
     path('budgetReview/', views.budgetReview_view, name='budgetReview'),
-    path('sellGoodies/', views.sellGoodies_view, name='sellGoodies'),
+    path('manageMarketplace/', views.manageMarketplace_view, name='manageMarketplace'),
 
     
 ]

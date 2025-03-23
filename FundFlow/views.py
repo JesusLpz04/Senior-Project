@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
-from .forms import CreatePollForm, CreateTicketForm, SignUpForm
-from .models import Poll, CreateTicket, UserProfile, Organization
+from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
+from .models import Poll, CreateTicket, UserProfile, Organization, FundingRequest
 from django.contrib.auth import login #,authenticate, logout
 from django.contrib.auth.models import Group, User
 
@@ -187,9 +187,42 @@ def manageOrg_view(request):
     template = loader.get_template('manageOrg.html')
     return HttpResponse(template.render(context,request))
 
-def budgetRequests_view(request):
-    template = loader.get_template('budgetRequests.html')
-    return HttpResponse(template.render())
+def fundingRequests_view(request):
+    # Get all funding requests for display
+    funding_requests = FundingRequest.objects.all().order_by('-created_at')
+    
+    context = {
+        'funding_requests': funding_requests
+    }
+    template = loader.get_template('fundingRequests.html')
+    return HttpResponse(template.render(context, request))
+
+# This AJAX view is simplified but still available if you want to use it
+def create_funding_request(request):
+    if request.method == 'POST':
+        form = FundingRequestForm(request.POST)
+        if form.is_valid():
+            funding_request = form.save()
+            
+            # Return JSON response for AJAX requests
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'success',
+                    'id': funding_request.id,
+                    'subject': funding_request.subject,
+                    'status': funding_request.status,
+                    'created_at': funding_request.created_at.strftime('%Y-%m-%d %H:%M')
+                })
+            
+            # Redirect for non-AJAX requests
+            return redirect('fundingRequests')
+        else:
+            # Return form errors
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    
+    # This view is mainly for AJAX, so return an error if accessed directly
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 def budgetReview_view(request):
 
@@ -218,6 +251,6 @@ def budgetReview_view(request):
     # return HttpResponse(template.render())
 
 
-def sellGoodies_view(request):
-    template = loader.get_template('sellGoodies.html')
+def manageMarketplace_view(request):
+    template = loader.get_template('manageMarketplace.html')
     return HttpResponse(template.render())
