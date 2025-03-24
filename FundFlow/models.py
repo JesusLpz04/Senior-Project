@@ -71,3 +71,28 @@ class CreateTicket(models.Model):
 
     def __str__(self):
         return f"Ticket created {self.id}: {self.amount} on {self.date}"
+
+class FundingRequest(models.Model):
+    STATUS_CHOICES = [
+        ('submitted', 'Submitted'),
+        ('review', 'Under Review'),
+        ('approved', 'Approved'),
+        ('denied', 'Denied'),
+    ]
+    
+    subject = models.CharField(max_length=255)
+    description = models.TextField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    link = models.URLField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Connect to User model for tracking who submitted the request
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='funding_requests')
+    
+    # Optional: Connect to Organization
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='funding_requests', null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.subject} (${self.amount}) - {self.status}"

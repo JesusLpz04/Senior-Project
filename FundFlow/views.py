@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
-from .forms import CreatePollForm, CreateTicketForm, SignUpForm
-from .models import Poll, CreateTicket, UserProfile, Organization
+from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
+from .models import Poll, CreateTicket, UserProfile, Organization, FundingRequest
 from django.contrib.auth import login #,authenticate, logout
 from django.contrib.auth.models import Group, User
 
@@ -15,39 +15,58 @@ def fund_flow(request):
 def home_logIn(request):
     return render(request, 'home.html', {})
 
-
-# def signup_view(request):
-#     template = loader.get_template('signUp.html')
-#     return HttpResponse(template.render())
-
 @csrf_protect
 def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST) # Reference the signupform form
+        
         if form.is_valid():
+<<<<<<< HEAD
             user = form.save() # Create user instance
+=======
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password1']
+            first_name = form.cleaned_data['first_name']
+            last_name = form.cleaned_data['last_name']
+>>>>>>> e9a17df08215e7a169222a43672bcac8d241ad94
 
-            # Create associated UserProfile for user.
-            UserProfile.objects.create(
-                user=user,
-                user_type='member'#default to member upon creation, can upgrade later
-            )
+            # Generate username from email
+            username = email.split('@')[0]
             
-            # Always assign new users as members
-            group = Group.objects.get_or_create(name='Members')
-            user.groups.add(group)
-            
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'A user with this email already exists.')  
+                return render(request, 'signUp.html', {'form': form})
 
-            # Signup success message shown in Django admin.
-            messages.success(request, 'Account created successfully!')
-            login(request, user)
             
-            return redirect('dashboard')
+            else:
+                # Create user instance 
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+
+                # Create UserProfile
+                UserProfile.objects.create(
+                    user=user,
+                    user_type='member'#default to member upon creation, can upgrade later
+                )
+
+                # Add to group
+                group, _ = Group.objects.get_or_create(name='Members') # Always assign new users as members
+                user.groups.add(group)
+
+                messages.success(request, 'Account created successfully!') #on django admin
+                login(request, user)
+                return redirect('dashboard')
     else:
         form = SignUpForm()
 
     context = {'form': form}
     return render(request, 'signUp.html', context)
+
 
 
 #later, will require login
@@ -203,9 +222,42 @@ def manageOrg_view(request):
     template = loader.get_template('manageOrg.html')
     return HttpResponse(template.render(context,request))
 
-def budgetRequests_view(request):
-    template = loader.get_template('budgetRequests.html')
-    return HttpResponse(template.render())
+def fundingRequests_view(request):
+    # Get all funding requests for display
+    funding_requests = FundingRequest.objects.all().order_by('-created_at')
+    
+    context = {
+        'funding_requests': funding_requests
+    }
+    template = loader.get_template('fundingRequests.html')
+    return HttpResponse(template.render(context, request))
+
+# This AJAX view is simplified but still available if you want to use it
+def create_funding_request(request):
+    if request.method == 'POST':
+        form = FundingRequestForm(request.POST)
+        if form.is_valid():
+            funding_request = form.save()
+            
+            # Return JSON response for AJAX requests
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'success',
+                    'id': funding_request.id,
+                    'subject': funding_request.subject,
+                    'status': funding_request.status,
+                    'created_at': funding_request.created_at.strftime('%Y-%m-%d %H:%M')
+                })
+            
+            # Redirect for non-AJAX requests
+            return redirect('fundingRequests')
+        else:
+            # Return form errors
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    
+    # This view is mainly for AJAX, so return an error if accessed directly
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 def budgetReview_view(request):
 
@@ -234,6 +286,7 @@ def budgetReview_view(request):
     # return HttpResponse(template.render())
 
 
+<<<<<<< HEAD
 def sellGoodies_view(request):
     template = loader.get_template('sellGoodies.html')
     return HttpResponse(template.render())
@@ -251,3 +304,8 @@ def joinOrg_view(request,org_id):
 
 
     return render(request, 'joinOrg.html', context)
+=======
+def manageMarketplace_view(request):
+    template = loader.get_template('manageMarketplace.html')
+    return HttpResponse(template.render())
+>>>>>>> e9a17df08215e7a169222a43672bcac8d241ad94
