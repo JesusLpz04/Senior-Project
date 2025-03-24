@@ -4,7 +4,7 @@ from django.template import loader
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm
-from .models import Poll, CreateTicket, UserProfile, CustomCategory, TicketManager
+from .models import Poll, CreateTicket, UserProfile, TicketManager #CustomCategory
 from django.contrib.auth import login #,authenticate, logout
 from django.contrib.auth.models import Group, User
 
@@ -82,10 +82,10 @@ def createticket_view(request):
         if form.is_valid():
             ticket = form.save(commit=False)
             
-            if ticket.expense_category == "other" and request.POST.get("new_custom_category"):
-                custom_category_name = request.POST["new_custom_category"]
-                custom_category = CustomCategory.objects.get_or_create(name=custom_category_name)
-                ticket.custom_category = custom_category
+            # if ticket.expense_category == "other" and request.POST.get("new_custom_category"):
+            #     custom_category_name = request.POST["new_custom_category"]
+            #     custom_category = CustomCategory.objects.get_or_create(name=custom_category_name)
+            #     ticket.custom_category = custom_category
             
             ticket.save()
             return redirect('expenses')

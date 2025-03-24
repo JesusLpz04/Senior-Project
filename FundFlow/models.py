@@ -36,12 +36,12 @@ class Poll(models.Model):
     def total(self):
         return self.option_one_count + self.option_two_count + self.option_three_count
 
-#for the drop down menu of category types
-class CustomCategory(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+# #for the drop down menu of category types
+# class CustomCategory(models.Model):
+#     name = models.CharField(max_length=50, unique=True)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
     
 class TicketManager(models.Manager):
     def get_balance(self):
@@ -84,18 +84,18 @@ class CreateTicket(models.Model):
         choices=CATEGORY_CHOICES, 
         default = 'supplies',
     ) 
-    custom_category = models.ForeignKey(
-        CustomCategory, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True
-    )   
+    # custom_category = models.ForeignKey(
+    #     CustomCategory, 
+    #     on_delete=models.SET_NULL, 
+    #     null=True, 
+    #     blank=True
+    # )   
     receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
     objects = TicketManager()
     
     def save(self, *args, **kwargs):
-        if self.expense_category == 'other' and self.custom_category: #if already exists
-            self.custom_category, _ = CustomCategory.objects.get_or_create(name=self.custom_category.name)#reuse
+        # if self.expense_category == 'other' and self.custom_category: #if already exists
+        #     self.custom_category, _ = CustomCategory.objects.get_or_create(name=self.custom_category.name)#reuse
         super().save(*args, **kwargs)
     
     def __str__(self):

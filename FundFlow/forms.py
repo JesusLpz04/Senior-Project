@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from .models import Poll, CreateTicket, CustomCategory
+from .models import Poll, CreateTicket #, CustomCategory
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -23,10 +23,10 @@ class CreateTicketForm(ModelForm):
 
     class Meta:
         model = CreateTicket
-        fields = ['amount', 'date', 'operation', 'expense_category', 'custom_category', 'receipt']
+        fields = ['amount', 'date', 'operation', 'expense_category', 'receipt'] #'custom_category'
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        custom_categories = [(cat.name, cat.name) for cat in CustomCategory.objects.all()] # grab custom categories
-        self.fields['expense_category'].choices += custom_categories # Append custom categories to default choices
+        #custom_categories = [(cat.name, cat.name) for cat in CustomCategory.objects.all()] # grab custom categories
+        self.fields['expense_category'].choices #+= custom_categories # Append custom categories to default choices
     
