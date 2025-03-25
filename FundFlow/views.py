@@ -10,32 +10,38 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 
+@login_required
+def check_auth(request):
+    print(f"Current user: {request.user}")
+    print(f"Is authenticated: {request.user.is_authenticated}")
+    return HttpResponse(f"You are logged in as {request.user.username}")
+
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
 
 def home_logIn(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
+        email = request.POST.get('email')  # Changed from username to email
         password = request.POST.get('password')
         
-        # Since using email, check email and then make username
+        # Get the username associated with the email
         try:
             user_obj = User.objects.get(email=email)
             username = user_obj.username
+            
+            # Now authenticate with the username
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                messages.success(request, 'Login successful!')
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Invalid password.')
         except User.DoesNotExist:
-            pass
-        
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            messages.success(request, 'Login successful!')
-            return redirect('dashboard')  # Redirect to dashboard after login
-        else:
-            messages.error(request, 'Invalid username or password.')
+            messages.error(request, 'No account found with this email.')
             
     return render(request, 'home.html', {})
-
 
 
 def logout_view(request):
@@ -103,8 +109,7 @@ def dashboard_view(request):
     context = {
         'orgs':orgs
     }
-    template = loader.get_template('dashboard.html')
-    return HttpResponse(template.render(context))
+    return render(request, 'dashboard.html', context)
 
 def expenses_view(request):
     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
@@ -286,5 +291,4 @@ def budgetReview_view(request):
 
 
 def manageMarketplace_view(request):
-    template = loader.get_template('manageMarketplace.html')
-    return HttpResponse(template.render())
+    return render(request, 'manageMarketplace.html')
