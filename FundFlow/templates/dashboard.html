@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 
 {% block content %}
     {% comment %} hard coded: later create model for orgs list  {% endcomment %}
@@ -12,13 +11,8 @@
                     <input type="text" id="text-label" placeholder="Search...">
                     <p>Or browse by name:</p>
                     <div class="org-grid">
-
                         {% for org in orgs %}
-                        <form method="POST" class="join-form">
-                            {% csrf_token %}
-                            {{ form|crispy }}
-                            <div class="org-item" btn="org-item" >{{org.name}}<button class="org-btn" name="org_id" value="{{org.id}}">view</button></div>  
-                        </form>
+                        <div class="org-item">{{org.name}}</div>
                         <!-- <div class="org-item">Org 2</div>
                         <div class="org-item">Org 3</div>
                         <div class="org-item">Org 4</div>
