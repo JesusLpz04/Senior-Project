@@ -24,6 +24,7 @@
     <header class="py-3 mb-4 border-bottom" id="header">
       <div class="header-container">
           <!-- Hamburger Menu Icon -->
+          {% if user.is_authenticated %}
           <span id="menu-toggle" class="menu-icon">&#9776;</span>
 
           <!-- Side Menu -->
@@ -33,6 +34,7 @@
               <a href="{% url 'budgetReview' %}">Budget Review</a>
               <a href="{% url 'manageMarketplace' %}">Manage Marketplace</a>
           </div>
+          {% endif %}
 
           <!-- Logo -->
           <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none">
@@ -41,9 +43,19 @@
               </span>
           </a>
       </div>
+      <div>
+        {% if user.is_authenticated %}
+        <form action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">Log Out</button>
+        </form>
+        {% endif %}
+      </div>
     </header>
 
+    {% if user.is_authenticated %}
     <nav class="py-2 bg-body-tertiary border-bottom">
+        
         <div class="container d-flex flex-wrap">
             <ul class="nav me-auto">
                 <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link link-body-emphasis px-2" aria-current="page">Dashboard</a></li>
@@ -51,10 +63,11 @@
                 <li class="nav-item"><a href="{% url 'fundingRequests' %}" class="nav-link link-body-emphasis px-2">Funding Requests</a></li>
                 <li class="nav-item"><a href="{% url 'voting' %}" class="nav-link link-body-emphasis px-2">Voting</a></li>
                 <li class="nav-item"><a href="{% url 'marketplace' %}" class="nav-link link-body-emphasis px-2">Marketplace</a></li>
-                <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li>
+                <!-- <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li> -->
             </ul>
         </div>
     </nav>
+    {% endif %}
 
   <!-- Page Content -->
     <div class="container">
