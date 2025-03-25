@@ -58,6 +58,7 @@ main {
     font-weight: bold;
   }
 
+
 #subtitle-label{
     font-size: 1.5em; 
     display: block; /* Ensures it's on its own line */
