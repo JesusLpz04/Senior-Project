@@ -22,6 +22,7 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.user_type}"
+    
 class Organization(models.Model):
     name= models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
@@ -92,7 +93,7 @@ class FundingRequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='funding_requests')
     
     # Optional: Connect to Organization
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='funding_requests', null=True, blank=True)
+    # organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='funding_requests', null=True, blank=True)
     
     def __str__(self):
         return f"{self.subject} (${self.amount}) - {self.status}"

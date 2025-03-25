@@ -6,14 +6,41 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
 from .models import Poll, CreateTicket, UserProfile, Organization, FundingRequest
-from django.contrib.auth import login #,authenticate, logout
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
 
 def home_logIn(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        # Since using email, check email and then make username
+        try:
+            user_obj = User.objects.get(email=email)
+            username = user_obj.username
+        except User.DoesNotExist:
+            pass
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Login successful!')
+            return redirect('dashboard')  # Redirect to dashboard after login
+        else:
+            messages.error(request, 'Invalid username or password.')
+            
     return render(request, 'home.html', {})
+
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')
 
 @csrf_protect
 def signup_view(request):
@@ -21,7 +48,6 @@ def signup_view(request):
         form = SignUpForm(request.POST) # Reference the signupform form
         
         if form.is_valid():
-            user = form.save() # Create user instance
             email = form.cleaned_data['email']
             password = form.cleaned_data['password1']
             first_name = form.cleaned_data['first_name']
@@ -71,30 +97,20 @@ def register_org(request):
     dropdown_options = ["Org 1", "Org 2", "Org 3"]  #Hardcoded data for now 
     return render(request, "registerorg.html", {"options": dropdown_options})
 
+@login_required
 def dashboard_view(request):
-    # Organization.objects.create(
-    #     name="testOrg2",
-    #     description="This is a description of my new organization 2."
-    # )
-    current_user = request.user
-
-    print(current_user)
     orgs= Organization.objects.all()
     context = {
         'orgs':orgs
     }
-    if request.method == 'POST':
-        org_id = request.POST.get('org_id')
-        org = Poll.objects.get(pk=org_id)
-        return redirect('joinOrg', org.id)
-    # template = loader.get_template('dashboard.html')
-    # return HttpResponse(template.render(context))
-    return render(request, 'dashboard.html', context)
+    template = loader.get_template('dashboard.html')
+    return HttpResponse(template.render(context))
 
 def expenses_view(request):
     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
     return render(request, 'expenses.html', {'tickets': tickets}) 
 
+@login_required
 def createticket_view(request):
     if request.method == 'POST':
         form = CreateTicketForm(request.POST, request.FILES)
@@ -107,6 +123,7 @@ def createticket_view(request):
     return render(request, 'createTicket.html', {'form': form})
 
 # Voting page views
+@login_required
 def voting_view(request):
     polls = Poll.objects.all()
     context = {
@@ -161,13 +178,13 @@ def resultsPoll_view(request, poll_id):
     template = loader.get_template('voting/resultsPoll.html')
     return HttpResponse(template.render(context, request)) 
 # End of voting page views
+
+@login_required
 def marketplace_view(request):
+    return render(request, 'marketplace.html')
 
-    template = loader.get_template('marketplace.html')
-    return HttpResponse(template.render()) 
-
+@login_required
 def manageOrg_view(request):
-    display=""
     # for user in User:
     #     if user.username == "testdummy":
     #         pres = user
@@ -175,50 +192,33 @@ def manageOrg_view(request):
     #     name="testOrg1",
     #     description="This is a description of my new organization."
     # )
-    orgs = Organization.objects.filter(name='testOrg2')
+    orgs = Organization.objects.filter(name='testOrg1')
     #users=User.objects.all()
     for i in orgs:
         orgs=i
         print(i.name)
-    membersLst=orgs.pending_members.all()
     if request.method == 'POST':
-        form_type = request.POST.get('form_type')
-        if form_type == 'members' :
-            display = 'members'
-            membersLst=orgs.members.all()
+        user_id = request.POST.get('user_id')
+        user = User.objects.get(pk=user_id)
+        print(user)
+        orgs.approve_membership(user)
 
-        if form_type == 'pending':
-            display ='pending'
-            membersLst=orgs.pending_members.all()
-
-        if form_type == 'remove':
-            display='members'
-            user_id = request.POST.get('members_user_id')
-            user = User.objects.get(pk=user_id)
-            orgs.members.remove(user)
-
-        if form_type == 'add':
-            display='pending'
-            user_id = request.POST.get('pending_user_id')
-            user = User.objects.get(pk=user_id)
-            print(user)
-            orgs.approve_membership(user)
-
-    # user = User.objects.filter(username='testdummy2')
+    # user = User.objects.filter(username='testdummy3')
     # for i in user:
     #     user = i
-
+    # print(user)
+    # print(orgs)
     # orgs.request_membership(user)
- 
+    members=orgs.pending_members.all()
     context = {
         'orgs' : orgs,
         #'users' : users,
-        'membersLst': membersLst,
-        'display': display
+        'members': members
     }
     template = loader.get_template('manageOrg.html')
     return HttpResponse(template.render(context,request))
 
+@login_required
 def fundingRequests_view(request):
     # Get all funding requests for display
     funding_requests = FundingRequest.objects.all().order_by('-created_at')
@@ -230,6 +230,7 @@ def fundingRequests_view(request):
     return HttpResponse(template.render(context, request))
 
 # This AJAX view is simplified but still available if you want to use it
+@login_required
 def create_funding_request(request):
     if request.method == 'POST':
         form = FundingRequestForm(request.POST)
@@ -256,6 +257,7 @@ def create_funding_request(request):
     # This view is mainly for AJAX, so return an error if accessed directly
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+@login_required
 def budgetReview_view(request):
 
     expenses = {"dues": 1200, "Food": 500, "merch": 200, "utilities": 150}
@@ -283,23 +285,6 @@ def budgetReview_view(request):
     # return HttpResponse(template.render())
 
 
-def sellGoodies_view(request):
-    template = loader.get_template('sellGoodies.html')
-    return HttpResponse(template.render())
-
-def joinOrg_view(request,org_id):
-    org = Organization.objects.get(pk=org_id)
-
-    context={
-        'org':org
-    }
-    current_user= request.user
-    if request.method == 'POST':
-        org.request_membership(current_user)
-        return redirect('dashboard')
-
-
-    return render(request, 'joinOrg.html', context)
 def manageMarketplace_view(request):
     template = loader.get_template('manageMarketplace.html')
     return HttpResponse(template.render())
