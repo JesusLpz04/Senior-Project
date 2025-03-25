@@ -24,8 +24,12 @@ class CreateTicketForm(ModelForm):
 
     class Meta:
         model = CreateTicket
-        fields = ['balance', 'amount', 'date', 'confirmation', 'receipt']
-
+        fields = ['amount', 'date', 'operation', 'expense_category', 'receipt'] 
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['expense_category'].choices 
+    
 class FundingRequestForm(ModelForm):
     class Meta:
         model = FundingRequest

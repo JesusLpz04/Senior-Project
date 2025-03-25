@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.db.models import Sum, F, Case, When, DecimalField
+
+
 # Create your models here.
 class UserProfile(models.Model):
     USER_TYPES = [
@@ -63,37 +66,51 @@ class Poll(models.Model):
     def total(self):
         return self.option_one_count + self.option_two_count + self.option_three_count
 
+
+class TicketManager(models.Manager):
+    def get_balance(self):
+        return self.aggregate(
+            total=Sum(
+                Case(
+                    When(operation='add', then=F('amount')),
+                    When(operation='minus', then=-F('amount')),
+                    default=0,
+                    output_field=DecimalField()
+                )
+            )
+        )['total'] or 0
+
 class CreateTicket(models.Model):
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField()  
-    confirmation = models.CharField(max_length=100)
-    receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
-
-    def __str__(self):
-        return f"Ticket created {self.id}: {self.amount} on {self.date}"
-
-class FundingRequest(models.Model):
-    STATUS_CHOICES = [
-        ('submitted', 'Submitted'),
-        ('review', 'Under Review'),
-        ('approved', 'Approved'),
-        ('denied', 'Denied'),
+    CATEGORY_CHOICES = [
+        ('supplies', 'Supplies'), 
+        ('reimbursements', 'Reimbursements'), 
+        ('food', 'Food'), 
+        ('travel', 'Travel'),
+        ('membershipfee', 'Membership Fee'),
+        ('other', 'Other'),
+    ]
+    MODIFY_CHOICES = [
+        ('add', '+'), 
+        ('minus', '-')        
     ]
     
-    subject = models.CharField(max_length=255)
-    description = models.TextField()
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    link = models.URLField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    date = models.DateField()  
+    operation = models.CharField(
+        max_length = 20, 
+        choices = MODIFY_CHOICES,
+        default = 'add',
+    )
+    expense_category = models.CharField(
+        max_length=20, 
+        choices=CATEGORY_CHOICES, 
+        default = 'supplies',
+    ) 
+    receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
+    objects = TicketManager()
     
-    # Connect to User model for tracking who submitted the request
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='funding_requests')
-    
-    # Optional: Connect to Organization
-    # organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='funding_requests', null=True, blank=True)
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.subject} (${self.amount}) - {self.status}"
+        return f"Ticket {self.id} created ({self.date}), balance: ${self.__class__.objects.get_balance()}"
