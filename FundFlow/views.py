@@ -21,14 +21,11 @@ def signup_view(request):
         form = SignUpForm(request.POST) # Reference the signupform form
         
         if form.is_valid():
-<<<<<<< HEAD
             user = form.save() # Create user instance
-=======
             email = form.cleaned_data['email']
             password = form.cleaned_data['password1']
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
->>>>>>> e9a17df08215e7a169222a43672bcac8d241ad94
 
             # Generate username from email
             username = email.split('@')[0]
@@ -286,7 +283,6 @@ def budgetReview_view(request):
     # return HttpResponse(template.render())
 
 
-<<<<<<< HEAD
 def sellGoodies_view(request):
     template = loader.get_template('sellGoodies.html')
     return HttpResponse(template.render())
@@ -304,8 +300,6 @@ def joinOrg_view(request,org_id):
 
 
     return render(request, 'joinOrg.html', context)
-=======
 def manageMarketplace_view(request):
     template = loader.get_template('manageMarketplace.html')
     return HttpResponse(template.render())
->>>>>>> e9a17df08215e7a169222a43672bcac8d241ad94

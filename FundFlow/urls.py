@@ -28,13 +28,10 @@ urlpatterns = [
     path('fundingRequests/', views.fundingRequests_view, name='fundingRequests'),
     path('fundingRequests/create/', views.create_funding_request, name='create_funding_request'),
     path('budgetReview/', views.budgetReview_view, name='budgetReview'),
-<<<<<<< HEAD
     path('sellGoodies/', views.sellGoodies_view, name='sellGoodies'),
     #joining an org
     path('joinOrganization/<org_id>', views.joinOrg_view, name='joinOrg'),
-=======
     path('manageMarketplace/', views.manageMarketplace_view, name='manageMarketplace'),
->>>>>>> e9a17df08215e7a169222a43672bcac8d241ad94
 
     
 ]
