@@ -6,14 +6,41 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
 from .models import Poll, CreateTicket, UserProfile, Organization, FundingRequest
-from django.contrib.auth import login #,authenticate, logout
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
 
 def home_logIn(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        # Since using email, check email and then make username
+        try:
+            user_obj = User.objects.get(email=email)
+            username = user_obj.username
+        except User.DoesNotExist:
+            pass
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Login successful!')
+            return redirect('dashboard')  # Redirect to dashboard after login
+        else:
+            messages.error(request, 'Invalid username or password.')
+            
     return render(request, 'home.html', {})
+
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('home')
 
 @csrf_protect
 def signup_view(request):
@@ -70,18 +97,20 @@ def register_org(request):
     dropdown_options = ["Org 1", "Org 2", "Org 3"]  #Hardcoded data for now 
     return render(request, "registerorg.html", {"options": dropdown_options})
 
+@login_required
 def dashboard_view(request):
     orgs= Organization.objects.all()
     context = {
         'orgs':orgs
     }
-    template = loader.get_template('dashboard.html')
-    return HttpResponse(template.render(context))
+    return render(request, 'dashboard.html', context)
 
+@login_required
 def expenses_view(request):
     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
     return render(request, 'expenses.html', {'tickets': tickets}) 
 
+@login_required
 def createticket_view(request):
     if request.method == 'POST':
         form = CreateTicketForm(request.POST, request.FILES)
@@ -94,6 +123,7 @@ def createticket_view(request):
     return render(request, 'createTicket.html', {'form': form})
 
 # Voting page views
+@login_required
 def voting_view(request):
     polls = Poll.objects.all()
     context = {
@@ -148,11 +178,12 @@ def resultsPoll_view(request, poll_id):
     template = loader.get_template('voting/resultsPoll.html')
     return HttpResponse(template.render(context, request)) 
 # End of voting page views
+
+@login_required
 def marketplace_view(request):
+    return render(request, 'marketplace.html')
 
-    template = loader.get_template('marketplace.html')
-    return HttpResponse(template.render()) 
-
+@login_required
 def manageOrg_view(request):
     # for user in User:
     #     if user.username == "testdummy":
@@ -187,6 +218,7 @@ def manageOrg_view(request):
     template = loader.get_template('manageOrg.html')
     return HttpResponse(template.render(context,request))
 
+@login_required
 def fundingRequests_view(request):
     # Get all funding requests for display
     funding_requests = FundingRequest.objects.all().order_by('-created_at')
@@ -198,6 +230,7 @@ def fundingRequests_view(request):
     return HttpResponse(template.render(context, request))
 
 # This AJAX view is simplified but still available if you want to use it
+@login_required
 def create_funding_request(request):
     if request.method == 'POST':
         form = FundingRequestForm(request.POST)
@@ -224,6 +257,7 @@ def create_funding_request(request):
     # This view is mainly for AJAX, so return an error if accessed directly
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+@login_required
 def budgetReview_view(request):
 
     expenses = {"dues": 1200, "Food": 500, "merch": 200, "utilities": 150}
@@ -250,7 +284,8 @@ def budgetReview_view(request):
     # template = loader.get_template('budgetReview.html')
     # return HttpResponse(template.render())
 
-
+@login_required
 def manageMarketplace_view(request):
-    template = loader.get_template('manageMarketplace.html')
-    return HttpResponse(template.render())
+    return render(request, 'manageMarketplace.html')
+    # template = loader.get_template('manageMarketplace.html')
+    # return HttpResponse(template.render())

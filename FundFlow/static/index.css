@@ -8,7 +8,7 @@ body {
 #header {
     background-color: #053C5E;
     border-bottom: 1px solid #2a668b;
-    padding: 1rem 4rem;
+    padding: .5rem 4rem;
     display: flex;
     align-items: center;
     justify-content: space-between; /* Ensures items are on the same row */
@@ -33,6 +33,25 @@ body {
 .logo img {
     height: 70px;
     width: auto;
+}
+
+/* Log out btn */
+.logout-btn{
+    background-color: #F8F5F0;
+    border: none;
+    text-decoration: none;
+    color: #053C5E;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.3);
+}
+
+.logout-btn:hover{
+    background-color: #2a668b;
+    color: white;
 }
 
 /* Side Menu Styling */
