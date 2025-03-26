@@ -360,7 +360,7 @@ def create_funding_request(request):
 def budgetReview_view(request):
     ticks=CreateTicket.objects.all()
     print(ticks)
-    labels = ', '.join(f'"{i.confirmation}"' for i in ticks)
+    labels = ', '.join(f'"{i.expense_category}"' for i in ticks)
     values = ', '.join(str(i.amount) for i in ticks)
     print(labels)
     # for i in ticks:
