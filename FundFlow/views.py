@@ -109,11 +109,26 @@ def register_org(request):
 
 @login_required
 def dashboard_view(request):
+# Organization.objects.create(
+    #     name="testOrg2",
+    #     description="This is a description of my new organization 2."
+    # )
+    current_user = request.user
+
+
+    print(current_user)
     orgs= Organization.objects.all()
     context = {
         'orgs':orgs
     }
+    if request.method == 'POST':
+        org_id = request.POST.get('org_id')
+        org = Organization.objects.get(pk=org_id)
+        return redirect('joinOrg', org.id)
+    # template = loader.get_template('dashboard.html')
+    # return HttpResponse(template.render(context))
     return render(request, 'dashboard.html', context)
+
 
 def expenses_view(request):
     tickets = CreateTicket.objects.all()  #grab updated tickets for log display
