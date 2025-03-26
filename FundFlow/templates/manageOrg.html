@@ -4,21 +4,49 @@
 {% block content %}
 <div class="container2">
     <h2>Manage Organization</h2>
-    <div class="buttons">
-        <button class="pending-btn"><i class="fas fa-filter"></i> Pending</button>
+    <div class="buttons"> 
+        <form method="POST" class="active-form">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input type="hidden" name="form_type" value="members">
+        <button class="pending-btn" name="members_btn"><i class="fas fa-filter" name="members_btn"></i> members</button>
+        </form>
+        <form method="POST" class="active-form">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input type="hidden" name="form_type" value="pending">
+        <button class="pending-btn" name="pending_btn"><i class="fas fa-filter"></i> Pending</button>
+        </form>
     </div>
     
     <!-- Name Container (Without Input) -->
-    {% for user in members %}
+     {% if display == "members" %}
+     <div>Current Members:</div>
+    {% for user in orgs.members.all %}
     <form method="POST" class="active-form">
         {% csrf_token %}
         {{ form|crispy }}
+        <input type="hidden" name="form_type" value="remove">
     <div class="name-container">
         <span class="name-display">{{ user.username }}</span>
-        <button class="active-btn" data-user-id="{{ user.id }}" name="user_id" value="{{user.id}}">Active</button>
+        <button class="active-btn" data-user-id="{{ user.id }}" name="members_user_id" value="{{user.id}}">Remove</button>
     </div>
     </form>
     {% endfor %}
+    {% else %}
+    <div>Students waiting to join:</div>
+    {% for user in orgs.pending_members.all %}
+    <form method="POST" class="active-form">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input type="hidden" name="form_type" value="add">
+    <div class="name-container">
+        <span class="name-display">{{ user.username }}</span>
+        <button class="active-btn" data-user-id="{{ user.id }}" name="pending_user_id" value="{{user.id}}">Active</button>
+    </div>
+    </form>
+    {% endfor %}
+    {% endif %}
 </div>
 
 {% endblock %}

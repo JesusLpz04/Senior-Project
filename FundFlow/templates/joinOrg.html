@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="popup-overlay">
+    <div class="create-ticket-popup">
+        <h1>Join Organization</h1>
+        <div class="org-details">
+            <h2 class="org-name">{{ org.name }}</h2>
+            <p class="org-description">{{ org.description }}</p>
+        </div>
+        <form method="POST" class="join-form">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">Join</button>
+                <a href="{% url 'dashboard' %}" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
