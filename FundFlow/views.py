@@ -7,12 +7,14 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
-from .models import Poll, CreateTicket, UserProfile, Organization, FundingRequest
+from .models import Poll, CreateTicket, UserProfile, Organization, TicketManager, FundingRequest
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
 
 logger = logging.getLogger(__name__)
+
+from decimal import Decimal
 
 @login_required
 def check_auth(request):
@@ -160,15 +162,33 @@ def dashboard_view(request):
 
 
 def expenses_view(request):
-    tickets = CreateTicket.objects.all()  #grab updated tickets for log display
-    return render(request, 'expenses.html', {'tickets': tickets}) 
+    tickets = CreateTicket.objects.all().order_by('date', 'id')  
+    balance = CreateTicket.objects.get_balance()
+    running_balance = Decimal('0.00')
+    ticket_data = []
 
+    for ticket in tickets:
+        operation_symbol = '+' if ticket.operation == 'add' else '-'  
+        amount = ticket.amount if ticket.operation == 'add' else -ticket.amount
+        running_balance += amount
+        ticket_data.append({
+            'ticket': ticket,
+            'balance': running_balance,
+            'operation_symbol': operation_symbol  
+        })
+
+    return render(request, 'expenses.html', {
+    'tickets_with_balance': list(reversed(ticket_data)),  
+    'balance': balance  
+    })
+    
 @login_required
 def createticket_view(request):
     if request.method == 'POST':
         form = CreateTicketForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            ticket = form.save(commit=False)
+            ticket.save()
             return redirect('expenses')
     else:
         form = CreateTicketForm()
@@ -340,7 +360,7 @@ def create_funding_request(request):
 def budgetReview_view(request):
     ticks=CreateTicket.objects.all()
     print(ticks)
-    labels = ', '.join(f'"{i.confirmation}"' for i in ticks)
+    labels = ', '.join(f'"{i.expense_category}"' for i in ticks)
     values = ', '.join(str(i.amount) for i in ticks)
     print(labels)
     # for i in ticks:
