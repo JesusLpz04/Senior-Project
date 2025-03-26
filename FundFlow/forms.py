@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from .models import Poll, CreateTicket, UserProfile, FundingRequest
+from .models import Poll, CreateTicket, FundingRequest, UserProfile
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -24,8 +24,12 @@ class CreateTicketForm(ModelForm):
 
     class Meta:
         model = CreateTicket
-        fields = ['balance', 'amount', 'date', 'confirmation', 'receipt']
-
+        fields = ['amount', 'date', 'operation', 'expense_category', 'receipt'] 
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['expense_category'].choices 
+    
 class FundingRequestForm(ModelForm):
     class Meta:
         model = FundingRequest
