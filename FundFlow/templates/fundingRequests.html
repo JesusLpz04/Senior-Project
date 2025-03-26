@@ -69,89 +69,108 @@
         const openBtn = document.getElementById('openRequestForm');
         const closeBtn = document.querySelector('.close');
         const form = document.getElementById('fundingRequestForm');
-    
+
         // Open modal when clicking the Request Funds button
         openBtn.addEventListener('click', function(e) {
             e.preventDefault();
             modal.style.display = 'block';
         });
-    
+
         // Close modal when clicking the X
         closeBtn.addEventListener('click', function() {
             modal.style.display = 'none';
         });
-    
+
         // Close modal when clicking outside of it
         window.addEventListener('click', function(event) {
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
         });
-    
+
         // Handle form submission using AJAX
         form.addEventListener('submit', function(e) {
-            e.preventDefault();
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    
+    fetch('{% url "create_funding_request" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Parsed data:', data);
+        
+        // Check for successful submission
+        if (data.id && data.status) {
+            const requestsList = document.getElementById('requestsList');
             
-            const formData = new FormData(form);
+            // Remove empty state message if it exists
+            const emptyItem = requestsList.querySelector('.empty-list');
+            if (emptyItem) {
+                emptyItem.remove();
+            }
             
-            fetch('{% url "create_funding_request" %}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Add the new request to the list
-                    const requestsList = document.getElementById('requestsList');
-                    
-                    // Remove empty state message if it exists
-                    const emptyItem = requestsList.querySelector('.empty-list');
-                    if (emptyItem) {
-                        emptyItem.remove();
-                    }
-                    
-                    // Create new list item
-                    const listItem = document.createElement('li');
-                    listItem.className = 'requests-list-item';
-                    listItem.dataset.id = data.id;
-                    
-                    const subject = document.createElement('strong');
-                    subject.className = 'request-subject';
-                    subject.textContent = data.subject;
-                    
-                    const statusBadge = document.createElement('span');
-                    statusBadge.className = `pull-right status-badge status-${data.status}`;
-                    statusBadge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-                    
-                    listItem.appendChild(subject);
-                    listItem.appendChild(statusBadge);
-                    
-                    // Add to the beginning of the list
-                    if (requestsList.firstChild) {
-                        requestsList.insertBefore(listItem, requestsList.firstChild);
-                    } else {
-                        requestsList.appendChild(listItem);
-                    }
-                    
-                    // Reset form and close modal
-                    form.reset();
-                    modal.style.display = 'none';
-                } else {
-                    // Handle errors
-                    console.error('Form submission error:', data.errors);
-                    // Display errors to user (you could add more sophisticated error handling)
-                    alert('There was an error submitting your request. Please check all fields and try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while submitting your request. Please try again.');
-            });
-        });
+            // Create new list item
+            const listItem = document.createElement('li');
+            listItem.className = 'requests-list-item';
+            listItem.dataset.id = data.id;
+            
+            const subject = document.createElement('strong');
+            subject.className = 'request-subject';
+            subject.textContent = data.subject;
+            
+            const statusBadge = document.createElement('span');
+            statusBadge.className = `pull-right status-badge status-${data.status}`;
+            statusBadge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+            
+            listItem.appendChild(subject);
+            listItem.appendChild(statusBadge);
+            
+            // Add to the beginning of the list
+            if (requestsList.firstChild) {
+                requestsList.insertBefore(listItem, requestsList.firstChild);
+            } else {
+                requestsList.appendChild(listItem);
+            }
+            
+            // Reset form and close modal
+            form.reset();
+            modal.style.display = 'none';
+        } else {
+            // Handle error cases
+            console.error('Form submission error:', data);
+            
+            let errorMessage = 'Error submitting request:\n';
+            
+            if (data.errors) {
+                // Handle form validation errors
+                Object.keys(data.errors).forEach(field => {
+                    errorMessage += `${field}: ${data.errors[field]}\n`;
+                });
+            } else if (data.error) {
+                // Handle server-side error messages
+                errorMessage = data.error;
+            } else {
+                errorMessage = 'An unknown error occurred';
+            }
+            
+            alert(errorMessage);
+        }
+    })
+    .catch(error => {
+        console.error('Submission Error:', error);
+        alert('An error occurred while submitting your request. Please check the console for details.');
+    });
+});
     });
 </script>
 {% endblock %}
