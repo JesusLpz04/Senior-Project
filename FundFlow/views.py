@@ -104,7 +104,24 @@ def signup_view(request):
 
 #later, will require login
 def register_org(request):
-    dropdown_options = ["Org 1", "Org 2", "Org 3"]  #Hardcoded data for now 
+    dropdown_options = ["Org 1", "Org 2", "Org 3", "Org 4", "Org 5","testOrg2"]  #Hardcoded data for now 
+
+
+    if request.method == 'POST':
+        agree= request.POST.get('agree')
+        makeOrg= request.POST.get('dropdown')
+        desc=request.POST.get('desc')
+        if agree == "on":
+            exist=Organization.objects.filter(name=makeOrg)
+            if exist.exists()==False:
+                print("a")
+                Organization.objects.create(
+                    name=makeOrg,
+                    description=desc
+                )
+            return redirect('dashboard')
+    # dropdown_options = ["Org 1", "Org 2", "Org 3", "Org 4", "Org 5"]  #Hardcoded data for now 
+
     return render(request, "registerorg.html", {"options": dropdown_options})
 
 @login_required
