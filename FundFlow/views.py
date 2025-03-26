@@ -1,14 +1,18 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
+import logging
 
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
 from .models import Poll, CreateTicket, UserProfile, Organization, FundingRequest
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
+
+logger = logging.getLogger(__name__)
 
 @login_required
 def check_auth(request):
@@ -236,31 +240,38 @@ def fundingRequests_view(request):
 
 # This AJAX view is simplified but still available if you want to use it
 @login_required
+@require_http_methods(["POST"])
 def create_funding_request(request):
-    if request.method == 'POST':
-        form = FundingRequestForm(request.POST)
-        if form.is_valid():
-            funding_request = form.save()
-            
-            # Return JSON response for AJAX requests
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'status': 'success',
-                    'id': funding_request.id,
-                    'subject': funding_request.subject,
-                    'status': funding_request.status,
-                    'created_at': funding_request.created_at.strftime('%Y-%m-%d %H:%M')
-                })
-            
-            # Redirect for non-AJAX requests
-            return redirect('fundingRequests')
-        else:
-            # Return form errors
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    # Explicit check for AJAX request
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        return JsonResponse({
+            'error': 'Only AJAX requests are supported'
+        }, status=400)
     
-    # This view is mainly for AJAX, so return an error if accessed directly
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+    form = FundingRequestForm(request.POST)
+    
+    try:
+        if form.is_valid():
+            funding_request = form.save(commit=False)
+            funding_request.user = request.user
+            funding_request.save()
+            
+            return JsonResponse({
+                'id': funding_request.id,
+                'subject': funding_request.subject,
+                'status': funding_request.status,
+                'created_at': funding_request.created_at.strftime('%Y-%m-%d %H:%M')
+            })
+        else:
+            # Return form errors as JSON
+            return JsonResponse({
+                'errors': form.errors
+            }, status=400)
+    
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
 
 @login_required
 def budgetReview_view(request):
