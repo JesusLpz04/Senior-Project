@@ -105,8 +105,9 @@ def signup_view(request):
 #later, will require login
 def register_org(request):
     dropdown_options = ["Org 1", "Org 2", "Org 3", "Org 4", "Org 5","testOrg2"]  #Hardcoded data for now 
-
-
+    cur_user=request.user
+    cur_prof= UserProfile.objects.get(user=cur_user)
+    print(cur_prof)
     if request.method == 'POST':
         agree= request.POST.get('agree')
         makeOrg= request.POST.get('dropdown')
@@ -115,10 +116,16 @@ def register_org(request):
             exist=Organization.objects.filter(name=makeOrg)
             if exist.exists()==False:
                 print("a")
-                Organization.objects.create(
+                new_org=Organization.objects.create(
                     name=makeOrg,
-                    description=desc
+                    description=desc,
+                    president= cur_user
                 )
+                new_org.members.add(cur_user)
+                cur_prof.user_type = 'president'
+                cur_prof.save()
+                print(cur_prof.user_type)
+
             return redirect('dashboard')
     # dropdown_options = ["Org 1", "Org 2", "Org 3", "Org 4", "Org 5"]  #Hardcoded data for now 
 
@@ -133,12 +140,12 @@ def dashboard_view(request):
     current_user = request.user
 
 
-    print(current_user)
+    # print(current_user)
     orgs= Organization.objects.all()
     belongsOrgs= Organization.objects.filter(members=current_user)
-    for i in belongsOrgs:
-        print(i.name)
-    print(belongsOrgs)
+    # for i in belongsOrgs:
+    #     print(i.name)
+    # print(belongsOrgs)
     context = {
         'orgs':orgs,
         'belongsOrgs':belongsOrgs
