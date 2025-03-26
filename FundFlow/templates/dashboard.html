@@ -49,6 +49,18 @@
                     <div class="expand" id="expand-btn">Expand list</div>
                 </div>
             </div>
+            {% for apt in belongsOrgs %}
+            <div class="info-container">
+                    <div class="apart-of">
+                        <div class="show-belong-org-name">{{apt.name}}</div>
+                        <div class="show-belong-org-description">
+                            {{apt.description}}
+                        </div>
+                        
+                    </div>
+            </div>
+            
+            {% endfor %}
             <div class = "info-container">
                 <div class="text-container">
                     <label id="subtitle-label">Register your student organizations!</label>

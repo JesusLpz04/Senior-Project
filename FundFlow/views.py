@@ -135,8 +135,13 @@ def dashboard_view(request):
 
     print(current_user)
     orgs= Organization.objects.all()
+    belongsOrgs= Organization.objects.filter(members=current_user)
+    for i in belongsOrgs:
+        print(i.name)
+    print(belongsOrgs)
     context = {
-        'orgs':orgs
+        'orgs':orgs,
+        'belongsOrgs':belongsOrgs
     }
     if request.method == 'POST':
         org_id = request.POST.get('org_id')
@@ -231,10 +236,10 @@ def manageOrg_view(request):
     #     if user.username == "testdummy":
     #         pres = user
     # Organization.objects.create(
-    #     name="testOrg1",
+    #     name="testOrg2",
     #     description="This is a description of my new organization."
     # )
-    orgs = Organization.objects.filter(name='testOrg2')
+    orgs = Organization.objects.filter(name='testOrg1')
     #users=User.objects.all()
     for i in orgs:
         orgs=i
@@ -326,13 +331,21 @@ def create_funding_request(request):
 
 @login_required
 def budgetReview_view(request):
+    ticks=CreateTicket.objects.all()
+    print(ticks)
+    labels = ', '.join(f'"{i.confirmation}"' for i in ticks)
+    values = ', '.join(str(i.amount) for i in ticks)
+    print(labels)
+    # for i in ticks:
+    #     print(i.confirmation.join(","))
 
-    expenses = {"dues": 1200, "Food": 500, "merch": 200, "utilities": 150}
+    # expenses = {"dues": 1200, "Food": 500, "merch": 200, "utilities": 150}
 
 
-    labels = ', '.join(f'"{label}"' for label in expenses.keys()) 
-    values = ', '.join(str(value) for value in expenses.values())  
-
+    # labels = ', '.join(f'"{label}"' for label in expenses.keys()) 
+    # values = ', '.join(str(value) for value in expenses.values())  
+    # print(labels)
+    # print(values)
     script = f"""
     var ctx = document.getElementById('budgetChart').getContext('2d');
     new Chart(ctx, {{
