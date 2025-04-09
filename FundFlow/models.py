@@ -9,7 +9,8 @@ class UserProfile(models.Model):
     USER_TYPES = [
         ('president', 'President'),
         ('treasurer', 'Treasurer'), 
-        ('member', 'Member')
+        ('member', 'Member'),
+        ('student', 'Student') #unaffiliated , default
     ]
     
     # One user correlates to one user profile.
@@ -21,6 +22,7 @@ class UserProfile(models.Model):
     user_type = models.CharField(
         max_length=10, 
         choices=USER_TYPES
+        default = 'student'
     )
 
     def __str__(self):

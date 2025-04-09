@@ -22,9 +22,6 @@ def check_auth(request):
     print(f"Is authenticated: {request.user.is_authenticated}")
     return HttpResponse(f"You are logged in as {request.user.username}")
 
-def fund_flow(request):
-    return HttpResponse("Hello, this is your fundflow method!")
-
 def home_logIn(request):
     if request.method == 'POST':
         email = request.POST.get('email')  # Changed from username to email
@@ -86,11 +83,11 @@ def signup_view(request):
                 # Create UserProfile
                 UserProfile.objects.create(
                     user=user,
-                    user_type='member'#default to member upon creation, can upgrade later
+                    user_type='student'#default to student upon creation, can upgrade later
                 )
 
                 # Add to group
-                group, _ = Group.objects.get_or_create(name='Members') # Always assign new users as members
+                group, _ = Group.objects.get_or_create(name='Students') # Always assign new users as students 
                 user.groups.add(group)
 
                 messages.success(request, 'Account created successfully!') #on django admin
