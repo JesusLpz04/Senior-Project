@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
-from .models import Poll, CreateTicket, UserProfile, Organization, TicketManager, FundingRequest
+from .models import Poll, CreateTicket, UserProfile, Membership, Organization, TicketManager, FundingRequest
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -16,11 +16,23 @@ logger = logging.getLogger(__name__)
 
 from decimal import Decimal
 
+
+
+# membership = Membership.objects.get(user=request.user, organization=org)
+
+# if membership.role in ['treasurer', 'president']:
+#     # allow managing finances
+# elif membership.role == 'member':
+#     # can vote
+# else:
+#     # can only browse
+
 @login_required
 def check_auth(request):
     print(f"Current user: {request.user}")
     print(f"Is authenticated: {request.user.is_authenticated}")
     return HttpResponse(f"You are logged in as {request.user.username}")
+
 
 def home_logIn(request):
     if request.method == 'POST':
@@ -46,12 +58,14 @@ def home_logIn(request):
             
     return render(request, 'home.html', {})
 
-
 def logout_view(request):
     logout(request)
     return redirect('home')
 
+
 @csrf_protect
+#separating global identity (User/UserProfile) from per-org relationships (Membership)
+#does not create Membership upon sign up
 def signup_view(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST) # Reference the signupform form
@@ -83,11 +97,11 @@ def signup_view(request):
                 # Create UserProfile
                 UserProfile.objects.create(
                     user=user,
-                    user_type='student'#default to student upon creation, can upgrade later
+                    user_type='guest' #default to guest upon creation, upgrades come with membership creation
                 )
 
                 # Add to group
-                group, _ = Group.objects.get_or_create(name='Students') # Always assign new users as students 
+                group, _ = Group.objects.get_or_create(name='Guests') # Always assign new users as guests 
                 user.groups.add(group)
 
                 messages.success(request, 'Account created successfully!') #on django admin
@@ -114,47 +128,42 @@ def register_org(request):
         if agree == "on":
             exist=Organization.objects.filter(name=makeOrg)
             if exist.exists()==False:
-                print("a")
+                print("Making new org")
                 new_org=Organization.objects.create(
                     name=makeOrg,
                     description=desc,
-                    president= cur_user
                 )
-                new_org.members.add(cur_user)
-                cur_prof.user_type = 'president'
-                cur_prof.save()
-                cur_prof.current_Org=new_org
-                cur_prof.save()
+                
+                Membership.objects.create(
+                    user=cur_user,
+                    organization=new_org,
+                    role='president',
+                    status='active'
+                )
+                
                 print(cur_prof.user_type)
+                membership = Membership.objects.get(user=request.user, organization=org)
+                print(membership.role)
 
             return redirect('dashboard')
-    # dropdown_options = ["Org 1", "Org 2", "Org 3", "Org 4", "Org 5"]  #Hardcoded data for now 
 
     return render(request, "registerorg.html", {"options": dropdown_options})
 
 @login_required
 def dashboard_view(request):
-# Organization.objects.create(
-    #     name="testOrg2",
-    #     description="This is a description of my new organization 2."
-    # )
-    current_user = request.user
-    curProf=UserProfile.objects.get(user=current_user)
 
-    # print(current_user)
+    membership = Membership.objects.get(user=request.user, organization=org)
+
+    cur_user = request.user
+    cur_prof=UserProfile.objects.get(user=cur_user)
+
     orgs= Organization.objects.all()
-    belongsOrgs= Organization.objects.filter(members=current_user)
-    pendsOrgs= Organization.objects.filter(pending_members=current_user)
-    # for i in belongsOrgs:
-    #     print(i.name)
-    # print(belongsOrgs)
-    user_type= curProf.user_type
+    belongsOrgs= Organization.objects.filter(members=cur_user)
+    pendsOrgs= Organization.objects.filter(pending_members=cur_user)
+
+    user_type= cur_prof.user_type
     print(user_type)
-    # context = {
-    #     'orgs':orgs,
-    #     'belongsOrgs':belongsOrgs,
-    #     'user_type':user_type
-    # }
+
     if request.method == 'POST':
         form_type = request.POST.get('dashb')
         if form_type == 'search':
@@ -171,20 +180,17 @@ def dashboard_view(request):
         if form_type == 'explore':
             apt_id = request.POST.get('apt_id')
             orgd = Organization.objects.get(pk=apt_id)
-            curProf.current_Org= orgd
-            curProf.save()
-            print(curProf.current_Org)
-            if current_user == curProf.current_Org.president:
-                curProf.user_type= 'president'
-                curProf.save()
+            cur_prof.current_Org= orgd
+            cur_prof.save()
+            print(cur_prof.current_Org)
+            if cur_user == cur_prof.current_Org.president:
+                cur_prof.user_type= 'president'
+                cur_prof.save()
             else:
-                curProf.user_type='member'
-                curProf.save()
-            print(curProf.user_type)
+                cur_prof.user_type='member'
+                cur_prof.save()
+            print(cur_prof.user_type)
             return redirect('dashboard')
-            #curProf.save()
-    # template = loader.get_template('dashboard.html')
-    # return HttpResponse(template.render(context))
     context = {
         'orgs':orgs,
         'belongsOrgs':belongsOrgs,

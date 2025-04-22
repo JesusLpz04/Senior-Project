@@ -3,68 +3,132 @@ from django.contrib.auth.models import User
 
 from django.db.models import Sum, F, Case, When, DecimalField
 
+#Role-Based Access Control Models
 
-# Create your models here.
-class UserProfile(models.Model):
-    USER_TYPES = [
-        ('president', 'President'),
-        ('treasurer', 'Treasurer'), 
-        ('member', 'Member'),
-        ('student', 'Student') #unaffiliated , default
-    ]
-    
-    # One user correlates to one user profile.
-    user = models.OneToOneField(
-        User, #primary attributes of the default user are: username, password, email, first_name, last_name
-        on_delete=models.CASCADE
-    )
-    
-    user_type = models.CharField(
-        max_length=10, 
-        choices=USER_TYPES,
-        default = 'student'
-    )
-
-    current_Org=models.ForeignKey(
-        'Organization',
-        on_delete=models.SET_NULL,  # <- this makes sure UserProfile isn't deleted
-        blank=True,
-        null=True
-    )
-
-    def __str__(self):
-        return f"{self.user.email} - {self.user_type}"
-    
+#Organization position will determine permissions. 
 class Organization(models.Model):
     name= models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
-    president = models.ForeignKey(User, on_delete=models.CASCADE, related_name='president_of', blank=True, null=True)
-    members = models.ManyToManyField(User, related_name='organizations', blank=True)
-    pending_members = models.ManyToManyField(User, related_name='pending_organizations', blank=True)
+
+    #Functions for managing student/member role changes and checking statuses
+   
+    #change view so that it says view org instead of join for already members)
+    #same logic will apply for admin
     
-    def request_membership(self, user):
-        if user not in self.members.all() and user not in self.pending_members.all():
-            self.pending_members.add(user)
+    #For student use 
+    def request_membership(self, user): #'student' user requesting to join
+        membership = Membership.objects.get(user=user, organization=self)
 
+        if membership.role == 'student' and membership.status == 'not_requested':
+            membership.status = 'pending'
+            membership.save()
+        
+    #For President Use    
     def approve_membership(self, user):
-        if user in self.pending_members.all():
-            self.pending_members.remove(user)
-            self.members.add(user)
+        membership = Membership.objects.filter( #user is a student who requested to join org
+            user=user,
+            organization=self,
+            role='student',
+            status='pending'
+        ).first()
 
-    def deny_membership(self, user):
-        if user in self.pending_members.all():
-            self.pending_members.remove(user)
+        if membership: 
+            membership.role = 'member'
+            membership.status = 'active'
+            membership.save() #user has changed roles, now an active member 
 
+    #For President Use 
+    def deny_membership(self, user): #user is a student whose status will change from pending back to not_requested
+        membership = Membership.objects.get(user=user, organization=self)
+
+        if membership.role == 'student' and membership.status == 'pending':
+            membership.status = 'not_requested' 
+            membership.save()
+
+    #For President use
     def get_pending_requests(self):
-        return self.pending_members.all()
+        return Membership.objects.filter(organization=self,  role='student', status='pending',)
+    
+    #For President Use
+    def get_members(self): #retrieves all including treasurer and pres
+        return Membership.objects.filter(organization=self, status='active')
 
-    def get_accepted_members(self):
-        return self.members.all()
+    #for President Use
+    def remove_member(self, user):
+        membership = Membership.objects.filter(
+            user=user,
+            organization=self,
+            status='active'
+        ).first()
+
+        if membership:
+            membership.status = 'not_requested'
+            membership.role = 'student'
+            membership.save()
+
+
+class UserProfile(models.Model):
+    USER_TYPE_CHOICES = [
+        ('guest', 'Guest'),
+        ('admin', 'Site Admin'),  # not per-org admin, but global #approves treasurer/president requests , has their own pg
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='student')
+
     def __str__(self):
-        return self.name
+        return self.user.username
 
+
+
+#We arent using the built-in Groups model because roles vary per org
+class Membership(models.Model): #connecting users to unique organiztions (Many to Many)
+    
+    ROLE_CHOICES = [
+        ('president', 'President'),
+        ('treasurer', 'Treasurer'), 
+        ('member', 'Member'),
+        ('student', 'Student') #default upon join
+    ]
+    role = models.CharField( #was user_type
+        max_length=20, 
+        choices=ROLE_CHOICES, 
+        default='student'
+    )
+    
+    STATUS_CHOICES = [
+        ('not_requested', 'Has not requested'),
+        ('pending', 'Pending'),
+        ('active', 'Active')
+    ]
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='not_requested'
+    )
+
+    # One user correlates to one user profile
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    # Creating a users role for each organization
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'organization')  # no duplicate memberships
+
+    def __str__(self):
+        return f"{self.user.username} in {self.organization.name} as {self.role}"
+    
+
+#Filter based on Org and user roles
 class Poll(models.Model):
+    
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     question = models.TextField()
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    #make this scalable 
     option_one = models.CharField(max_length=50)
     option_two = models.CharField(max_length=50)
     option_three = models.CharField(max_length=50)
@@ -90,6 +154,10 @@ class TicketManager(models.Manager):
         )['total'] or 0
 
 class CreateTicket(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) 
+    created_at = models.DateTimeField(auto_now_add=True)
+    
     CATEGORY_CHOICES = [
         ('supplies', 'Supplies'), 
         ('reimbursements', 'Reimbursements'), 
@@ -105,6 +173,7 @@ class CreateTicket(models.Model):
     
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()  
+    
     operation = models.CharField(
         max_length = 20, 
         choices = MODIFY_CHOICES,
@@ -125,6 +194,8 @@ class CreateTicket(models.Model):
         return f"Ticket {self.id} created ({self.date}), balance: ${self.__class__.objects.get_balance()}"
     
 class FundingRequest(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    
     STATUS_CHOICES = [
         ('submitted', 'Submitted'),
         ('review', 'Under Review'),
@@ -137,6 +208,7 @@ class FundingRequest(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     link = models.URLField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

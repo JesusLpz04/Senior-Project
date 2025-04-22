@@ -7,8 +7,6 @@ from django.conf import settings
 
 
 urlpatterns = [
-    #tester
-    path('fundflow/', views.fund_flow, name='FundFlow'),
     path('check-auth/', views.check_auth, name='check_auth'),
     #path for home, which is the login page
     path('', views.home_logIn, name='home'),
