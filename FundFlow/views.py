@@ -126,6 +126,8 @@ def register_org(request):
                 new_org.members.add(cur_user)
                 cur_prof.user_type = 'president'
                 cur_prof.save()
+                cur_prof.current_Org=new_org
+                cur_prof.save()
                 print(cur_prof.user_type)
 
             return redirect('dashboard')
@@ -140,24 +142,58 @@ def dashboard_view(request):
     #     description="This is a description of my new organization 2."
     # )
     current_user = request.user
-
+    curProf=UserProfile.objects.get(user=current_user)
 
     # print(current_user)
     orgs= Organization.objects.all()
     belongsOrgs= Organization.objects.filter(members=current_user)
+    pendsOrgs= Organization.objects.filter(pending_members=current_user)
     # for i in belongsOrgs:
     #     print(i.name)
     # print(belongsOrgs)
-    context = {
-        'orgs':orgs,
-        'belongsOrgs':belongsOrgs
-    }
+    user_type= curProf.user_type
+    print(user_type)
+    # context = {
+    #     'orgs':orgs,
+    #     'belongsOrgs':belongsOrgs,
+    #     'user_type':user_type
+    # }
     if request.method == 'POST':
-        org_id = request.POST.get('org_id')
-        org = Organization.objects.get(pk=org_id)
-        return redirect('joinOrg', org.id)
+        form_type = request.POST.get('dashb')
+        if form_type == 'search':
+            inp=request.POST.get('seb')
+            if inp:
+                orgs = Organization.objects.filter(name__icontains=inp)
+                print(orgs)
+            else:
+                orgs = Organization.objects.all() 
+        if form_type == 'viewJoin' :
+            org_id = request.POST.get('org_id')
+            org = Organization.objects.get(pk=org_id)
+            return redirect('joinOrg', org.id)
+        if form_type == 'explore':
+            apt_id = request.POST.get('apt_id')
+            orgd = Organization.objects.get(pk=apt_id)
+            curProf.current_Org= orgd
+            curProf.save()
+            print(curProf.current_Org)
+            if current_user == curProf.current_Org.president:
+                curProf.user_type= 'president'
+                curProf.save()
+            else:
+                curProf.user_type='member'
+                curProf.save()
+            print(curProf.user_type)
+            return redirect('dashboard')
+            #curProf.save()
     # template = loader.get_template('dashboard.html')
     # return HttpResponse(template.render(context))
+    context = {
+        'orgs':orgs,
+        'belongsOrgs':belongsOrgs,
+        'user_type':user_type,
+        'pendsOrgs':pendsOrgs
+    }
     return render(request, 'dashboard.html', context)
 
 
@@ -258,6 +294,22 @@ def marketplace_view(request):
 
 @login_required
 def manageOrg_view(request):
+    curUser=request.user
+    inOrg=Organization.objects.filter(president=curUser)
+    curProf=UserProfile.objects.get(user=curUser)
+    print(curProf.user_type=="member")
+    print(curProf.current_Org.president)
+    if curProf.user_type== "member" or curProf.current_Org.president != curUser :
+        return render(request, 'noAccess.html')
+        orgs = Organization.objects.filter(name='testOrg1')
+
+    # for i in inOrg:
+    #     print(i.president)
+    #     if i.president == curUser :
+    #         orgs= i
+    #     else:
+    #         orgs = Organization.objects.filter(name='testOrg1')
+    orgs=curProf.current_Org
     display=""
     # for user in User:
     #     if user.username == "testdummy":
@@ -266,11 +318,11 @@ def manageOrg_view(request):
     #     name="testOrg2",
     #     description="This is a description of my new organization."
     # )
-    orgs = Organization.objects.filter(name='testOrg1')
+   # orgs = Organization.objects.filter(name='testOrg1')
     #users=User.objects.all()
-    for i in orgs:
-        orgs=i
-        print(i.name)
+    # for i in orgs:
+    #     orgs=i
+    #     print(i.name)
     membersLst=orgs.pending_members.all()
     if request.method == 'POST':
         form_type = request.POST.get('form_type')
@@ -300,10 +352,10 @@ def manageOrg_view(request):
     #     user = i
 
     # orgs.request_membership(user)
- 
+    user_type=curProf.user_type
     context = {
         'orgs' : orgs,
-        #'users' : users,
+        'user_type' : user_type,
         'membersLst': membersLst,
         'display': display
     }
@@ -373,6 +425,9 @@ def budgetReview_view(request):
     # values = ', '.join(str(value) for value in expenses.values())  
     # print(labels)
     # print(values)
+    curUser=request.user
+    curProf=UserProfile.objects.get(user=curUser)
+    user_type=curProf.user_type
     script = f"""
     var ctx = document.getElementById('budgetChart').getContext('2d');
     new Chart(ctx, {{
@@ -386,8 +441,7 @@ def budgetReview_view(request):
         }}
     }});
     """
-
-    return render(request, 'budgetReview.html', {"chart_script": script})
+    return render(request, 'budgetReview.html', {"chart_script": script, "user_type": user_type})
     # template = loader.get_template('budgetReview.html')
     # return HttpResponse(template.render())
 
@@ -405,4 +459,10 @@ def joinOrg_view(request,org_id):
 
     return render(request, 'joinOrg.html', context)
 def manageMarketplace_view(request):
-    return render(request, 'manageMarketplace.html')
+    curUser=request.user
+    curProf=UserProfile.objects.get(user=curUser)
+    user_type=curProf.user_type
+    context={
+        'user_type':user_type
+    }
+    return render(request, 'manageMarketplace.html',context)

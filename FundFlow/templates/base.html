@@ -25,15 +25,19 @@
       <div class="header-container">
           <!-- Hamburger Menu Icon -->
           {% if user.is_authenticated %}
+          {% if user_type == "president" or user_type == "treasurer" %}
           <span id="menu-toggle" class="menu-icon">&#9776;</span>
 
           <!-- Side Menu -->
+           
+           
           <div id="side-menu" class="side-menu">
               <a href="#" class="close-btn" onclick="closeMenu()">&times;</a>
               <a href="{% url 'manageOrg' %}">Manage Org.</a>
               <a href="{% url 'budgetReview' %}">Budget Review</a>
               <a href="{% url 'manageMarketplace' %}">Manage Marketplace</a>
           </div>
+          {% endif %}
           {% endif %}
 
           <!-- Logo -->
