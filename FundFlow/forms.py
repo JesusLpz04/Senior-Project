@@ -24,7 +24,7 @@ class CreateTicketForm(ModelForm):
 
     class Meta:
         model = CreateTicket
-        fields = ['amount', 'date', 'operation', 'expense_category', 'receipt'] 
+        fields = ['amount', 'date', 'operation', 'expense_category', 'description', 'receipt'] 
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
