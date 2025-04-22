@@ -25,6 +25,13 @@ class UserProfile(models.Model):
         default = 'student'
     )
 
+    current_Org=models.ForeignKey(
+        'Organization',
+        on_delete=models.SET_NULL,  # <- this makes sure UserProfile isn't deleted
+        blank=True,
+        null=True
+    )
+
     def __str__(self):
         return f"{self.user.email} - {self.user_type}"
     
