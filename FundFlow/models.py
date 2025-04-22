@@ -113,6 +113,7 @@ class CreateTicket(models.Model):
         choices=CATEGORY_CHOICES, 
         default = 'supplies',
     ) 
+    description = models.TextField(default = 'Description Here')
     receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
     objects = TicketManager()
     
