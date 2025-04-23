@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
-from .models import Poll, CreateTicket, UserProfile, Organization, TicketManager, FundingRequest
+from .models import Poll, CreateTicket, UserProfile, Organization, TicketManager, FundingRequest, Tag, Marketplace, CartItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -286,11 +286,8 @@ def resultsPoll_view(request, poll_id):
     }
     template = loader.get_template('voting/resultsPoll.html')
     return HttpResponse(template.render(context, request)) 
-# End of voting page views
+# End of voting page views    
 
-@login_required
-def marketplace_view(request):
-    return render(request, 'marketplace.html')
 
 @login_required
 def manageOrg_view(request):
@@ -456,8 +453,37 @@ def joinOrg_view(request,org_id):
         org.request_membership(current_user)
         return redirect('dashboard')
 
-
     return render(request, 'joinOrg.html', context)
+
+
+
+@login_required
+def marketplace_view(request):
+    items = CreateItem.objects.all() 
+    item_data = []
+
+    for item in items:
+        item_data.append({
+            'item': item
+        })
+
+    #example for filter
+    #Marketplace.objects.filter(tags__name__in=["Clothing", "Pins"]).distinct()
+
+
+    def add_to_cart(user, item, quantity=1):
+        cart_item, created = CartItem.objects.get_or_create(user=user, item=item)
+        if not created:
+            cart_item.quantity += quantity
+        cart_item.save()
+
+    def remove_from_cart(user, item):
+        CartItem.objects.filter(user=user, item=item).delete()
+        
+    return render(request, 'marketplace.html', {
+    'item_data': item_data
+    })
+
 def manageMarketplace_view(request):
     curUser=request.user
     curProf=UserProfile.objects.get(user=curUser)
@@ -466,3 +492,15 @@ def manageMarketplace_view(request):
         'user_type':user_type
     }
     return render(request, 'manageMarketplace.html',context)
+
+def createitem_view(request):
+    if request.method == 'POST':
+        form = CreateItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            ticket = form.save(commit=False)
+            ticket.save()
+            return redirect('manageMarketplace')
+    else:
+        form = CreateItemForm()
+
+    return render(request, 'createItem.html', {'form': form})

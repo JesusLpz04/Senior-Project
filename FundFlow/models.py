@@ -147,3 +147,42 @@ class FundingRequest(models.Model):
     
     def __str__(self):
         return f"{self.subject} (${self.amount}) - {self.status}"
+    
+
+#MARKET PLACE 
+#later will be tied to org and fit into Role based model system 
+#Pres/Treasurer use 
+class Tag(models.Model):
+    name = models.CharField(max_length=30, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class CreateItem(models.Model):
+    item_name = models.CharField(max_length=100, unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    image = models.FileField(upload_to='merchIMG/', null=True, blank=True)
+    supply = models.PositiveIntegerField()
+    
+    tags = models.ManyToManyField(Tag, blank=True)
+
+    def __str__(self):
+        return f"Item {self.item_name} (${self.price}). {self.supply} left"
+
+#User Use
+class CartItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    item = models.ForeignKey(CreateItem, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        unique_together = ('user', 'item')
+
+    def __str__(self):
+        return f"{self.user.username} has {self.quantity} of {self.item.item_name}"
+
+
+
+
+ 
+    
