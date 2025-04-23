@@ -17,16 +17,6 @@ logger = logging.getLogger(__name__)
 from decimal import Decimal
 
 
-
-# membership = Membership.objects.get(user=request.user, organization=org)
-
-# if membership.role in ['treasurer', 'president']:
-#     # allow managing finances
-# elif membership.role == 'member':
-#     # can vote
-# else:
-#     # can only browse
-
 @login_required
 def check_auth(request):
     print(f"Current user: {request.user}")
@@ -113,7 +103,55 @@ def signup_view(request):
     context = {'form': form}
     return render(request, 'signUp.html', context)
 
+@login_required
+def dashboard_view(request):
+    
+    #User INfo
+    cur_user = request.user
+    cur_prof = UserProfile.objects.get(user=cur_user)
 
+    # Get memberships across various orgs for User
+    user_memberships = Membership.objects.filter(user=cur_user)
+    active_org_ids = user_memberships.filter(status='active').values_list('organization_id', flat=True)
+    belongsOrgs = Organization.objects.filter(id__in=active_org_ids)
+    pendsOrgs = Organization.objects.filter(
+        id__in=user_memberships.filter(status='pending').values_list('organization_id', flat=True)
+    )
+    
+    # Orgs user is NOT a part of
+    orgs = Organization.objects.exclude(id__in=user_memberships.values_list('organization_id', flat=True))
+
+    #Search for orgs
+    if request.method == 'POST':
+        form_type = request.POST.get('dashb')
+        if form_type == 'search':
+            inp = request.POST.get('seb')
+            if inp:
+                orgs = orgs.filter(name__icontains=inp)  # filter among orgs user isn't in
+        elif form_type == 'viewJoin':
+            org_id = request.POST.get('org_id')
+            org = Organization.objects.get(pk=org_id)
+            return redirect('joinOrg', org.id)
+        elif form_type == 'explore':
+            apt_id = request.POST.get('apt_id')
+            orgd = Organization.objects.get(pk=apt_id)
+            cur_prof.current_Org = orgd
+            cur_prof.save()
+
+            membership = Membership.objects.get(user=cur_user, organization=orgd)
+            cur_prof.membership = membership
+            cur_prof.membership.role = membership.role
+            cur_prof.save()
+
+            return redirect('dashboard')
+
+    context = {
+        'orgs': orgs,
+        'belongsOrgs': belongsOrgs,
+        'pendsOrgs': pendsOrgs,
+        'user_type': cur_prof.user_type,
+    }
+    return render(request, 'dashboard.html', context)
 
 #later, will require login
 def register_org(request):
@@ -148,57 +186,6 @@ def register_org(request):
             return redirect('dashboard')
 
     return render(request, "registerorg.html", {"options": dropdown_options})
-
-@login_required
-def dashboard_view(request):
-
-    membership = Membership.objects.get(user=request.user, organization=org)
-
-    cur_user = request.user
-    cur_prof=UserProfile.objects.get(user=cur_user)
-
-    orgs= Organization.objects.all()
-    belongsOrgs= Organization.objects.filter(members=cur_user)
-    pendsOrgs= Organization.objects.filter(pending_members=cur_user)
-
-    user_type= cur_prof.user_type
-    print(user_type)
-
-    if request.method == 'POST':
-        form_type = request.POST.get('dashb')
-        if form_type == 'search':
-            inp=request.POST.get('seb')
-            if inp:
-                orgs = Organization.objects.filter(name__icontains=inp)
-                print(orgs)
-            else:
-                orgs = Organization.objects.all() 
-        if form_type == 'viewJoin' :
-            org_id = request.POST.get('org_id')
-            org = Organization.objects.get(pk=org_id)
-            return redirect('joinOrg', org.id)
-        if form_type == 'explore':
-            apt_id = request.POST.get('apt_id')
-            orgd = Organization.objects.get(pk=apt_id)
-            cur_prof.current_Org= orgd
-            cur_prof.save()
-            print(cur_prof.current_Org)
-            if cur_user == cur_prof.current_Org.president:
-                cur_prof.user_type= 'president'
-                cur_prof.save()
-            else:
-                cur_prof.user_type='member'
-                cur_prof.save()
-            print(cur_prof.user_type)
-            return redirect('dashboard')
-    context = {
-        'orgs':orgs,
-        'belongsOrgs':belongsOrgs,
-        'user_type':user_type,
-        'pendsOrgs':pendsOrgs
-    }
-    return render(request, 'dashboard.html', context)
-
 
 def expenses_view(request):
     tickets = CreateTicket.objects.all().order_by('date', 'id')  

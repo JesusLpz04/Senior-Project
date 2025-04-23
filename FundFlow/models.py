@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from django.db.models import Sum, F, Case, When, DecimalField
+from datetime import datetime
 
 #Role-Based Access Control Models
 
@@ -16,12 +17,20 @@ class Organization(models.Model):
     #same logic will apply for admin
     
     #For student use 
-    def request_membership(self, user): #'student' user requesting to join
-        membership = Membership.objects.get(user=user, organization=self)
+    def request_membership(self, user):  #'student' user requesting to join
+        membership = Membership.objects.filter(user=user, organization=self).first()
 
-        if membership.role == 'student' and membership.status == 'not_requested':
-            membership.status = 'pending'
-            membership.save()
+        if membership:
+            if membership.role == 'student' and membership.status == 'not_requested':
+                membership.status = 'pending'
+                membership.save()
+        else:
+            Membership.objects.create(
+                user=user,
+                organization=self,
+                role='student',
+                status='pending'
+            )
         
     #For President Use    
     def approve_membership(self, user):
@@ -65,6 +74,9 @@ class Organization(models.Model):
             membership.status = 'not_requested'
             membership.role = 'student'
             membership.save()
+            
+    def __str__(self):
+        return self.name
 
 
 class UserProfile(models.Model):
@@ -122,7 +134,6 @@ class Membership(models.Model): #connecting users to unique organiztions (Many t
 
 #Filter based on Org and user roles
 class Poll(models.Model):
-    
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     question = models.TextField()
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -138,6 +149,8 @@ class Poll(models.Model):
 
     def total(self):
         return self.option_one_count + self.option_two_count + self.option_three_count
+    def __str__(self):
+        return f"Poll made by {self.created_by} in {self.organization.name}"
 
 
 class TicketManager(models.Manager):
@@ -154,7 +167,7 @@ class TicketManager(models.Manager):
         )['total'] or 0
 
 class CreateTicket(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, blank=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True) 
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -214,9 +227,6 @@ class FundingRequest(models.Model):
     
     # Connect to User model for tracking who submitted the request
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='funding_requests')
-    
-    # Optional: Connect to Organization
-    # organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='funding_requests', null=True, blank=True)
     
     def __str__(self):
         return f"{self.subject} (${self.amount}) - {self.status}"
