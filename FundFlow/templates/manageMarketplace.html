@@ -13,7 +13,7 @@
             <th>Item Name</th>
             <th>Price</th>
             <th>Tags</th>
-            <th>Supply</th>
+            <th>Quantity</th>
             <th>Image</th>
         </tr>
     </thead>
@@ -23,7 +23,7 @@
             <td>{{ item.item.item_name  }}</td>
             <td>{{ item.item.price }}</td>
             <td>{{ item.item.tags }}</td>
-            <td>{{ item.item.supply }}</td>
+            <td>{{ item.item.quantity }}</td>
             <td>
                 {% if item.item.image %}
                     <a href="#" class="image-link" data-image="{{ item.item.image.url }}">View image</a>

@@ -150,27 +150,26 @@ class FundingRequest(models.Model):
     
 
 #MARKET PLACE 
-#later will be tied to org and fit into Role based model system 
 #Pres/Treasurer use
- 
-# class Tag(models.Model):
-#     name = models.CharField(max_length=30, unique=True)
-
-#     def __str__(self):
-#         return self.name
-
 class CreateItem(models.Model):
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='items')
     item_name = models.CharField(max_length=100, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     image = models.FileField(upload_to='merchIMG/', null=True, blank=True)
-    supply = models.PositiveIntegerField()
-    tags = models.TextField(default = 'All')
-    #tags = models.ManyToManyField(Tag, blank=True)
+    quantity = models.PositiveIntegerField()
+    TAGS_CHOICES = [
+        ('all', 'All'), 
+        ('membership', 'Membership'), ('tops', 'Tops'), ('bottoms', 'Bottoms'), 
+        ('hoodies', 'Hoodies'), ('hats', 'Hats'), ('clothing', 'Clothing'), 
+        ('pins', 'Pins'), ('tickets', 'Tickets'), ('holiday', 'Holiday'),
+    ]
+    tags = models.CharField(max_length=20, choices=TAGS_CHOICES, default = 'All')
 
     def __str__(self):
-        return f"Item {self.item_name} (${self.price}). {self.supply} left"
+        return f"Item {self.item_name} (${self.price}). {self.quantity} left."
 
 #User Use
+#for now it will be on a "place order" status? instead of 
 # class CartItem(models.Model):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE)
 #     item = models.ForeignKey(CreateItem, on_delete=models.CASCADE)

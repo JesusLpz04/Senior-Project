@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm, CreateItemForm
-from .models import Poll, CreateTicket, UserProfile, Organization, CreateItem, FundingRequest, TicketManager#, Tag , Marketplace, CartItem
+from .models import Poll, CreateTicket, UserProfile, Organization, CreateItem, FundingRequest, TicketManager #, CartItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -459,13 +459,19 @@ def joinOrg_view(request,org_id):
 
 @login_required
 def marketplace_view(request):
-    items = CreateItem.objects.all() 
-    item_data = []
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    thisOrg = curProf.current_Org
 
-    for item in items:
-        item_data.append({
-            'item': item
-        })
+    items = CreateItem.objects.filter(organization=thisOrg)
+
+    context = {
+        'user_type': user_type,
+        'items': items,
+    }
+
+    return render(request, 'marketplace.html', context)
 
     #example for filter
     #Marketplace.objects.filter(tags__name__in=["Clothing", "Pins"]).distinct()
@@ -482,35 +488,46 @@ def marketplace_view(request):
     return render(request, 'marketplace.html', {
     'item_data': item_data
     })
-
+    
 def manageMarketplace_view(request):
-    curUser=request.user
-    curProf=UserProfile.objects.get(user=curUser)
-    user_type=curProf.user_type
-    context={
-        'user_type':user_type
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    thisOrg = curProf.current_Org
+
+    items = CreateItem.objects.filter(organization=thisOrg)
+
+    context = {
+        'user_type': user_type,
+        'items': items,
     }
-    
-    items = CreateItem.objects.all() 
-    item_data = []
-    
-    for item in items:
-        item_data.append({
-        'item': item
-        })
-        return render(request, 'manageMarketplace.html', {
-        'item_data': item_data
-        })
-    #return render(request, 'manageMarketplace.html',context)
+
+    return render(request, 'manageMarketplace.html', context)
+
+
 
 def createitem_view(request):
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    thisOrg = curProf.current_Org
+
     if request.method == 'POST':
         form = CreateItemForm(request.POST, request.FILES)
         if form.is_valid():
-            ticket = form.save(commit=False)
-            ticket.save()
-            return redirect('manageMarketplace')
+            new_item = form.save(commit=False)  
+            new_item.organization = thisOrg    #adding item to current org 
+            new_item.save()  
+            return redirect('manageMarketplace')  
     else:
         form = CreateItemForm()
 
-    return render(request, 'createItem.html', {'form': form})
+    items = CreateItem.objects.filter(organization=thisOrg)
+
+    context = {
+        'user_type': user_type,
+        'form': form,
+        'items': items,
+    }
+
+    return render(request, 'manageMarketplace.html', context)

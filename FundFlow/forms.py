@@ -34,10 +34,11 @@ class CreateItemForm(ModelForm):
 
     class Meta:
         model = CreateItem
-        fields = ['item_name', 'price', 'supply', 'tags', 'image'] 
+        fields = ['item_name', 'price', 'quantity', 'tags', 'image'] 
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) 
+        self.fields['tags'].choices
         
 class FundingRequestForm(ModelForm):
     class Meta:
