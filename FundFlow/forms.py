@@ -1,6 +1,6 @@
 from django.forms import ModelForm
 from django import forms
-from .models import Poll, CreateTicket, FundingRequest, Tag, CreateItem, CartItem, UserProfile
+from .models import Poll, CreateTicket, FundingRequest, CreateItem,  UserProfile #, CartItem, Tag
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 

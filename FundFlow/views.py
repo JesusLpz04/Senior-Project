@@ -6,8 +6,8 @@ import logging
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
-from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
-from .models import Poll, CreateTicket, UserProfile, Organization, TicketManager, FundingRequest, Tag, Marketplace, CartItem
+from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm, CreateItemForm
+from .models import Poll, CreateTicket, UserProfile, Organization, CreateItem, FundingRequest, TicketManager#, Tag , Marketplace, CartItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -470,15 +470,14 @@ def marketplace_view(request):
     #example for filter
     #Marketplace.objects.filter(tags__name__in=["Clothing", "Pins"]).distinct()
 
+    # def add_to_cart(user, item, quantity=1):
+    #     cart_item, created = CartItem.objects.get_or_create(user=user, item=item)
+    #     if not created:
+    #         cart_item.quantity += quantity
+    #     cart_item.save()
 
-    def add_to_cart(user, item, quantity=1):
-        cart_item, created = CartItem.objects.get_or_create(user=user, item=item)
-        if not created:
-            cart_item.quantity += quantity
-        cart_item.save()
-
-    def remove_from_cart(user, item):
-        CartItem.objects.filter(user=user, item=item).delete()
+    # def remove_from_cart(user, item):
+    #     CartItem.objects.filter(user=user, item=item).delete()
         
     return render(request, 'marketplace.html', {
     'item_data': item_data
@@ -491,7 +490,18 @@ def manageMarketplace_view(request):
     context={
         'user_type':user_type
     }
-    return render(request, 'manageMarketplace.html',context)
+    
+    items = CreateItem.objects.all() 
+    item_data = []
+    
+    for item in items:
+        item_data.append({
+        'item': item
+        })
+        return render(request, 'manageMarketplace.html', {
+        'item_data': item_data
+        })
+    #return render(request, 'manageMarketplace.html',context)
 
 def createitem_view(request):
     if request.method == 'POST':
