@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Create Marketplace Item</h1>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div>
+        <label for="{{ form.item_name.id_for_label }}">Item Name:</label>
+        {{ form.item_name }}
+    </div>
+
+    <div>
+        <label for="{{ form.price.id_for_label }}">Price:</label>
+        {{ form.price }}
+    </div>
+
+    <div>
+        <label for="{{ form.quantity.id_for_label }}">Quantity:</label>
+        {{ form.quantity }}
+    </div>
+
+    <div>
+        <label>Tags:</label>
+        {{ form.tags }}
+    </div>
+
+    <div>
+        <label for="{{ form.image.id_for_label }}">Image (optional):</label>
+        {{ form.image }}
+    </div>
+
+    <button type="submit">Create Item</button>
+</form>
+
+{% if form.errors %}
+    <div style="color: red;">
+        {{ form.errors }}
+    </div>
+{% endif %}
+
+<a href="{% url 'manageMarketplace' %}">Back to Manage Marketplace</a>
+{% endblock %}
