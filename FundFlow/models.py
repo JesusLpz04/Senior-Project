@@ -37,6 +37,7 @@ class Organization(models.Model):
     name= models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     president = models.ForeignKey(User, on_delete=models.CASCADE, related_name='president_of', blank=True, null=True)
+    treasurer = models.ForeignKey(User, on_delete=models.SET_NULL ,related_name='treasurer_of', blank=True, null=True)
     members = models.ManyToManyField(User, related_name='organizations', blank=True)
     pending_members = models.ManyToManyField(User, related_name='pending_organizations', blank=True)
     

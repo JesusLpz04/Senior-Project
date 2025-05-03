@@ -33,7 +33,9 @@
            
           <div id="side-menu" class="side-menu">
               <a href="#" class="close-btn" onclick="closeMenu()">&times;</a>
+              {% if user_type == "president" %}
               <a href="{% url 'manageOrg' %}">Manage Org.</a>
+              {% endif %}
               <a href="{% url 'budgetReview' %}">Budget Review</a>
               <a href="{% url 'manageMarketplace' %}">Manage Marketplace</a>
           </div>

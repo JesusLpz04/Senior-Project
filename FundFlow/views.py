@@ -180,6 +180,9 @@ def dashboard_view(request):
             if current_user == curProf.current_Org.president:
                 curProf.user_type= 'president'
                 curProf.save()
+            elif current_user == curProf.current_Org.treasurer:
+                curProf.user_type= 'treasurer'
+                curProf.save()
             else:
                 curProf.user_type='member'
                 curProf.save()
