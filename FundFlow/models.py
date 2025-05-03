@@ -40,6 +40,7 @@ class Organization(models.Model):
     members = models.ManyToManyField(User, related_name='organizations', blank=True)
     pending_members = models.ManyToManyField(User, related_name='pending_organizations', blank=True)
     
+        
     def request_membership(self, user):
         if user not in self.members.all() and user not in self.pending_members.all():
             self.pending_members.add(user)
@@ -60,6 +61,27 @@ class Organization(models.Model):
         return self.members.all()
     def __str__(self):
         return self.name
+
+#MARKET PLACE 
+#Pres/Treasurer use
+class Tag(models.Model):
+    name = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Item(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='items')
+    item_name = models.CharField(max_length=100, unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    image = models.FileField(upload_to='merchIMG/', null=True, blank=True)
+    quantity = models.PositiveIntegerField()
+    tags = models.ManyToManyField(Tag, related_name='items')
+
+    def __str__(self):
+        tag_names = ', '.join(tag.name for tag in self.tags.all())
+        return f"Item {self.item_name} (${self.price}). {self.quantity} left. Tags: {tag_names}."
+
 
 class Poll(models.Model):
     question = models.TextField()
@@ -149,37 +171,8 @@ class FundingRequest(models.Model):
         return f"{self.subject} (${self.amount}) - {self.status}"
     
 
-#MARKET PLACE 
-#Pres/Treasurer use
-class CreateItem(models.Model):
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='items')
-    item_name = models.CharField(max_length=100, unique=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.FileField(upload_to='merchIMG/', null=True, blank=True)
-    quantity = models.PositiveIntegerField()
-    TAGS_CHOICES = [
-        ('all', 'All'), 
-        ('membership', 'Membership'), ('tops', 'Tops'), ('bottoms', 'Bottoms'), 
-        ('hoodies', 'Hoodies'), ('hats', 'Hats'), ('clothing', 'Clothing'), 
-        ('pins', 'Pins'), ('tickets', 'Tickets'), ('holiday', 'Holiday'),
-    ]
-    tags = models.CharField(max_length=20, choices=TAGS_CHOICES, default = 'All')
 
-    def __str__(self):
-        return f"Item {self.item_name} (${self.price}). {self.quantity} left."
 
-#User Use
-#for now it will be on a "place order" status? instead of 
-# class CartItem(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     item = models.ForeignKey(CreateItem, on_delete=models.CASCADE)
-#     quantity = models.PositiveIntegerField(default=1)
-
-#     class Meta:
-#         unique_together = ('user', 'item')
-
-#     def __str__(self):
-#         return f"{self.user.username} has {self.quantity} of {self.item.item_name}"
 
 
 

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 import logging
@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm, CreateItemForm
-from .models import Poll, CreateTicket, UserProfile, Organization, CreateItem, FundingRequest, TicketManager #, CartItem
+from .models import Poll, CreateTicket, UserProfile, Organization, Item, FundingRequest, TicketManager #, CartItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -456,48 +456,32 @@ def joinOrg_view(request,org_id):
     return render(request, 'joinOrg.html', context)
 
 
-
 @login_required
 def marketplace_view(request):
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
     thisOrg = curProf.current_Org
-
-    items = CreateItem.objects.filter(organization=thisOrg)
+    
+    items = Item.objects.all()  
 
     context = {
         'user_type': user_type,
         'items': items,
     }
-
     return render(request, 'marketplace.html', context)
 
-    #example for filter
-    #Marketplace.objects.filter(tags__name__in=["Clothing", "Pins"]).distinct()
-
-    # def add_to_cart(user, item, quantity=1):
-    #     cart_item, created = CartItem.objects.get_or_create(user=user, item=item)
-    #     if not created:
-    #         cart_item.quantity += quantity
-    #     cart_item.save()
-
-    # def remove_from_cart(user, item):
-    #     CartItem.objects.filter(user=user, item=item).delete()
-        
-    return render(request, 'marketplace.html', {
-    'item_data': item_data
-    })
-    
+@login_required
 def manageMarketplace_view(request):
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
     thisOrg = curProf.current_Org
 
-    items = CreateItem.objects.filter(organization=thisOrg)
+    items = Item.objects.filter(organization=thisOrg)
 
     context = {
+        'thisOrg': thisOrg,
         'user_type': user_type,
         'items': items,
     }
@@ -506,6 +490,7 @@ def manageMarketplace_view(request):
 
 
 
+@login_required
 def createitem_view(request):
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
@@ -515,14 +500,15 @@ def createitem_view(request):
     if request.method == 'POST':
         form = CreateItemForm(request.POST, request.FILES)
         if form.is_valid():
-            new_item = form.save(commit=False)  
-            new_item.organization = thisOrg    #adding item to current org 
-            new_item.save()  
-            return redirect('manageMarketplace')  
+            new_item = form.save(commit=False)
+            new_item.organization = thisOrg  # adding item to current org
+            new_item.save()
+            form.save_m2m()  
+            return redirect('manageMarketplace')
     else:
         form = CreateItemForm()
 
-    items = CreateItem.objects.filter(organization=thisOrg)
+    items = Item.objects.filter(organization=thisOrg)
 
     context = {
         'user_type': user_type,
@@ -530,4 +516,21 @@ def createitem_view(request):
         'items': items,
     }
 
-    return render(request, 'manageMarketplace.html', context)
+    return render(request, 'createitem.html', context)
+
+
+@login_required
+def delete_item_view(request, item_id):
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    thisOrg = curProf.current_Org
+
+    item = get_object_or_404(Item, id=item_id, organization=thisOrg)
+
+    if request.method == 'POST':
+        item.delete()
+        return redirect('manageMarketplace')
+    
+    return render(request, 'confirm_delete.html', {'item': item})
+
+

@@ -31,6 +31,7 @@ urlpatterns = [
     path('budgetReview/', views.budgetReview_view, name='budgetReview'),
     path('manageMarketplace/', views.manageMarketplace_view, name='manageMarketplace'),
     path('createitem/', views.createitem_view, name='createitem'),
+    path('items/delete/<int:item_id>/', views.delete_item_view, name='delete_item'),
     path('joinOrganization/<org_id>', views.joinOrg_view, name='joinOrg'),
     
 ]

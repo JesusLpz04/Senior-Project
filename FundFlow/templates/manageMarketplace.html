@@ -2,38 +2,99 @@
 
 {% block content %}
 <h1>Manage Marketplace</h1>
+<h2>Organization {{thisOrg}} </h2>
 <a id="create-item-btn-label" href="{% url 'createitem' %}">
     <button class="create-item-btn" >+ create item</button>
 </a> 
 
-6
-<table class= "log-table">
-    <thead>
-        <tr>
-            <th>Item Name</th>
-            <th>Price</th>
-            <th>Tags</th>
-            <th>Quantity</th>
-            <th>Image</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in item_data %}
-        <tr>
-            <td>{{ item.item.item_name  }}</td>
-            <td>{{ item.item.price }}</td>
-            <td>{{ item.item.tags }}</td>
-            <td>{{ item.item.quantity }}</td>
-            <td>
-                {% if item.item.image %}
-                    <a href="#" class="image-link" data-image="{{ item.item.image.url }}">View image</a>
-                {% else %}
-                    No iimage provided 
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div>
+    <table class= "log-table">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Price</th>
+                <th>Tags</th>
+                <th>Quantity</th>
+                <th>Image</th>
+                <th> Delete Item </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.item_name  }}</td>
+                <td>{{ item.price }}</td>
+                <td>
+                    {% for tag in item.tags.all %}
+                      {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                      No tags
+                    {% endfor %}
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td>
+                    {% if item.image %}
+                        <a href="#" class="image-link" data-image="{{ item.image.url }}">View image</a>
+                    {% else %}
+                        No image provided 
+                    {% endif %}
+                </td>
+                <td><a href="{% url 'delete_item' item.id %}"> Delete </a></td>             
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</div>
+<!-- item image modal -->
+<div id="itemModal" class="item">
+    <div class="item-content">
+        <span class="close">&times;</span>
+        <div id="itemContainer">
+            <!-- Receipt will be displayed here -->
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var modal = document.getElementById('itemModal');
+        var container = document.getElementById('itemContainer');
+        var span = document.getElementsByClassName('close')[0];
+        var itemLinks = document.getElementsByClassName('image-link');
+        
+        // When the user clicks on a item link, open the modal
+        for (var i = 0; i < itemLinks.length; i++) {
+            itemLinks[i].addEventListener('click', function(event) {
+                event.preventDefault();
+                var itemUrl = this.getAttribute('data-image');
+                
+                // Check file type to determine how to display it
+                if (itemUrl.toLowerCase().endsWith('.pdf')) {
+                    container.innerHTML = '<iframe src="' + itemtUrl + '" width="100%" height="500px"></iframe>';
+                } else {
+                    container.innerHTML = '<img src="' + itemUrl + '" style="max-width:100%; max-height:80vh;">';
+                }
+                
+                modal.style.display = 'block';
+            });
+        }
+        
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = 'none';
+        }
+        
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    });
+</script>
 
 {%endblock%}
+
