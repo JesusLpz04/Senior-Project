@@ -8,57 +8,51 @@
 
 <div class ="manage-item-info-container"> 
     <a id="create-item-btn" href="{% url 'createitem' %}">
-        <button type="create-item-btn-text" > + create item</button>
+        <button class="create-item-btn-text" > + create item</button>
     </a> 
 
-    <label for="manage-item-search">Search for item </label>
+    <label id="manage-item-search">Search for item </label>
+    <label id ="manage-filter-subtitle-label"> Keywords </label> 
 
-    <div class = "manage-filter-item-container"> 
-        <label id ="manage-filter-subtitle-label"> Keywords </label> 
+    {% comment %} tags {% endcomment %}
+    
+    {% comment %} {% for tag in alltags %}
+    {{alltags}}
+    {% end for %} {% endcomment %}
 
-        {% comment %} tags {% endcomment %}
-        
-        {% comment %} {% for tag in alltags %}
-        {{alltags}}
-        {% end for %} {% endcomment %}
+    <label id = "filter-tags-label"> tagnamevari </label>
 
-        <label id = "filter-tags-label"> tagnamevari </div>
-
-        <div class = "manage-filter-price-container">
-            <div class =  "double-slider-box">
-                <label id = "manage-filter-subtitle-label"> Price </label> 
-                <div class = "range-slider">
-                    <span class = "slider-track"> </span>
-                    <input type = "range" name="min_val" class = "min-val" min = "1000" max = "12000" value = "2000">
-                    <input type = "range" name="max_val" class = "max-val" min = "1000" max = "12000" value = "7000">
-                    <div class = "tooltip min-tooltip"> </div>
-                    <div class = "tooltip max-tooltip"> </div>
+    <div class =  "double-slider-box">
+        <label id = "manage-filter-subtitle-label"> Price </label> 
+        <div class = "range-slider">
+            <span class = "slider-track"> </span>
+            <input type = "range" name="min_val" class = "min-val" min = "1000" max = "12000" value = "2000">
+            <input type = "range" name="max_val" class = "max-val" min = "1000" max = "12000" value = "7000">
+            <div class = "tooltip min-tooltip"> </div>
+            <div class = "tooltip max-tooltip"> </div>
+        </div>
+        <div class = "input-box">
+            <div class = "min-box">
+                <div class = "input-wrap">
+                    <span class = "input-addon">$</span>
+                    <input type = "text" name = "min_input" class = "input-field min-input">
                 </div>
-                <div class = "input-box">
-                    <div class = "min-box">
-                        <div class = "input-wrap">
-                            <span class = "input-addon">$</span>
-                            <input type = "text" name = "min_input" class = "input-field min-input">
-                        </div>
-                    </div>
+            </div>
 
-                    <div class = "max-box">
-                        <div class = "input-wrap">
-                            <span class = "input-addon">$</span>
-                            <input type = "text" name = "max_input" class = "input-field max-input">
-                        </div>
-                    </div>
+            <div class = "max-box">
+                <div class = "input-wrap">
+                    <span class = "input-addon">$</span>
+                    <input type = "text" name = "max_input" class = "input-field max-input">
                 </div>
             </div>
         </div>
+    </div>
 
 
 
 
         {% comment %} Sort by {% endcomment %}
 
-
-    </div>
 
 
 </div>
