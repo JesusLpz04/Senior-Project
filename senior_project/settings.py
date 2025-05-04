@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'crispy_forms',
     'crispy_bootstrap4',
+    'senior_project'
 
 ]
 
@@ -139,3 +140,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
