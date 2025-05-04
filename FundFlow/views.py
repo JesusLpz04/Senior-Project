@@ -480,10 +480,14 @@ def manageMarketplace_view(request):
 
     items = Item.objects.filter(organization=thisOrg)
 
+    # alltags = tag.name for tag in self.tags.all()
+    # alltags = Item.objects.get(tags)
+    
     context = {
         'thisOrg': thisOrg,
         'user_type': user_type,
         'items': items,
+        # 'alltags': alltags
     }
 
     return render(request, 'manageMarketplace.html', context)

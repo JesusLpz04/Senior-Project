@@ -1,11 +1,67 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Manage Marketplace</h1>
-<h2>Organization {{thisOrg}} </h2>
-<a id="create-item-btn-label" href="{% url 'createitem' %}">
-    <button class="create-item-btn" >+ create item</button>
-</a> 
+
+
+<h1 id = "manage-org-title"> Manage {{thisOrg}} Marketplace</h1>
+
+
+<div class ="manage-item-info-container"> 
+    <a id="create-item-btn" href="{% url 'createitem' %}">
+        <button type="create-item-btn-text" > + create item</button>
+    </a> 
+
+    <label for="manage-item-search">Search for item </label>
+
+    <div class = "manage-filter-item-container"> 
+        <label id ="manage-filter-subtitle-label"> Keywords </label> 
+
+        {% comment %} tags {% endcomment %}
+        
+        {% comment %} {% for tag in alltags %}
+        {{alltags}}
+        {% end for %} {% endcomment %}
+
+        <label id = "filter-tags-label"> tagnamevari </div>
+
+        <div class = "manage-filter-price-container">
+            <div class =  "double-slider-box">
+                <label id = "manage-filter-subtitle-label"> Price </label> 
+                <div class = "range-slider">
+                    <span class = "slider-track"> </span>
+                    <input type = "range" name="min_val" class = "min-val" min = "1000" max = "12000" value = "2000">
+                    <input type = "range" name="max_val" class = "max-val" min = "1000" max = "12000" value = "7000">
+                    <div class = "tooltip min-tooltip"> </div>
+                    <div class = "tooltip max-tooltip"> </div>
+                </div>
+                <div class = "input-box">
+                    <div class = "min-box">
+                        <div class = "input-wrap">
+                            <span class = "input-addon">$</span>
+                            <input type = "text" name = "min_input" class = "input-field min-input">
+                        </div>
+                    </div>
+
+                    <div class = "max-box">
+                        <div class = "input-wrap">
+                            <span class = "input-addon">$</span>
+                            <input type = "text" name = "max_input" class = "input-field max-input">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        {% comment %} Sort by {% endcomment %}
+
+
+    </div>
+
+
+</div>
 
 <div>
     <table class= "log-table">
@@ -59,6 +115,54 @@
 
 
 <script>
+
+    window.onload = function () {
+        slideMin();
+        slideMax();
+      };
+      
+      const minVal = document.querySelector(".min-val");
+      const maxVal = document.querySelector(".max-val");
+      const priceInputMin = document.querySelector(".min-input");
+      const priceInputMax = document.querySelector(".max-input");
+      const minTooltip = document.querySelector(".min-tooltip");
+      const maxTooltip = document.querySelector(".max-tooltip");
+      const minGap = 1500;
+      const range = document.querySelector(".slider-track");
+      const sliderMinValue = parseInt(minVal.min);
+      const sliderMaxValue = parseInt(maxVal.max);
+      
+      function slideMin() {
+        let gap = parseInt(maxVal.value) - parseInt(minVal.value);
+      }
+      
+      function slideMax() {
+        let gap = parseInt(maxVal.value) - parseInt(minVal.value);
+      }
+      
+      function setArea() {
+        range.style.left = `${
+          ((minVal.value - sliderMinValue) / (sliderMaxValue - sliderMinValue)) * 100
+        }%`;
+      
+        range.style.left = (minVal.value / sliderMaxValue) * 100 + "%";
+        minTooltip.style.left = (minVal.value / sliderMaxValue) * 100 + "%";
+        range.style.right = `${
+          100 -
+          ((maxVal.value - sliderMinValue) / (sliderMaxValue - sliderMinValue)) * 100
+        }%`;
+        maxTooltip.style.right = 100 - (maxVal.value / sliderMaxValue) * 100 + "%";
+      }
+      
+      function setMinInput() {
+        let minPrice = parseInt(priceInputMin.value);
+      }
+      
+      function setMaxInput() {
+        let maxPrice = parseInt(priceInputMax.value);
+      }
+
+
     document.addEventListener('DOMContentLoaded', function() {
         var modal = document.getElementById('itemModal');
         var container = document.getElementById('itemContainer');
