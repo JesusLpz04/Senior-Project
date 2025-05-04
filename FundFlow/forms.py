@@ -1,8 +1,10 @@
 from django.forms import ModelForm
 from django import forms
 from .models import Poll, CreateTicket, FundingRequest, Item,  Tag, UserProfile #, CartItem, Tag
+from .models import Poll, CreateTicket, FundingRequest, Item,  Tag, UserProfile #, CartItem, Tag
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+
 
 
 class SignUpForm(UserCreationForm):
@@ -33,10 +35,34 @@ class CreateTicketForm(ModelForm):
     class Meta:
         model = CreateTicket
         fields = ['amount', 'date', 'operation', 'expense_category', 'description', 'receipt'] 
+        fields = ['amount', 'date', 'operation', 'expense_category', 'description', 'receipt'] 
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['expense_category'].choices 
+    
+
+
+class CreateItemForm(ModelForm):
+    image = forms.FileField(
+        required=False,
+        widget=forms.FileInput(attrs={'accept': 'image/jpeg,image/png,application/pdf'})
+    )
+
+    tags = forms.ModelMultipleChoiceField(
+        queryset=Tag.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    class Meta:
+        model = Item
+        fields = ['item_name', 'price', 'quantity', 'tags', 'image']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+        
     
 
 
