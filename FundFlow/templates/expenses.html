@@ -34,6 +34,7 @@
                     <th>Amount</th>
                     <th>Date</th>
                     <th>Expense Category</th>
+                    <th>Description</th>
                     <th>Receipt</th>
                 </tr>
             </thead>
@@ -44,6 +45,7 @@
                     <td>{{ item.operation_symbol }} {{ item.ticket.amount }}</td>
                     <td>{{ item.ticket.date }}</td>
                     <td>{{ item.ticket.expense_category }}</td>
+                    <td>{{ item.ticket.description }} </td>
                     <td>
                         {% if item.ticket.receipt %}
                             <a href="#" class="receipt-link" data-receipt="{{ item.ticket.receipt.url }}">View Receipt</a>
