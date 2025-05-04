@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 import logging
@@ -6,11 +6,12 @@ import logging
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
-from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm
-from .models import Poll, CreateTicket, UserProfile, Organization, TicketManager, FundingRequest
+from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm, CreateItemForm
+from .models import Poll, CreateTicket, UserProfile, Organization, Item, FundingRequest, TicketManager #, CartItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -234,12 +235,22 @@ def createticket_view(request):
 # Voting page views
 @login_required
 def voting_view(request):
-    polls = Poll.objects.all()
+    from django.utils import timezone
+    
+    current_time = timezone.now()
+    polls = Poll.objects.filter(expiration_date__gt=current_time)
+    
+    # Debug print
+    print(f"Current time: {current_time}")
+    print(f"Number of polls found: {polls.count()}")
+    for poll in polls:
+        print(f"Poll: {poll.question}, Expires: {poll.expiration_date}")
+    
     context = {
-        'polls' : polls
+        'polls': polls
     }
     template = loader.get_template('voting/voting.html')
-    return HttpResponse(template.render(context, request)) 
+    return HttpResponse(template.render(context, request))
 
 def createPoll_view(request):
     if request.method == 'POST':
@@ -286,11 +297,8 @@ def resultsPoll_view(request, poll_id):
     }
     template = loader.get_template('voting/resultsPoll.html')
     return HttpResponse(template.render(context, request)) 
-# End of voting page views
+# End of voting page views    
 
-@login_required
-def marketplace_view(request):
-    return render(request, 'marketplace.html')
 
 @login_required
 def manageOrg_view(request):
@@ -456,13 +464,84 @@ def joinOrg_view(request,org_id):
         org.request_membership(current_user)
         return redirect('dashboard')
 
-
     return render(request, 'joinOrg.html', context)
-def manageMarketplace_view(request):
-    curUser=request.user
-    curProf=UserProfile.objects.get(user=curUser)
-    user_type=curProf.user_type
-    context={
-        'user_type':user_type
+
+
+@login_required
+def marketplace_view(request):
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    thisOrg = curProf.current_Org
+    
+    items = Item.objects.all()  
+
+    context = {
+        'user_type': user_type,
+        'items': items,
     }
-    return render(request, 'manageMarketplace.html',context)
+    return render(request, 'marketplace.html', context)
+
+@login_required
+def manageMarketplace_view(request):
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    thisOrg = curProf.current_Org
+
+    items = Item.objects.filter(organization=thisOrg)
+
+    context = {
+        'thisOrg': thisOrg,
+        'user_type': user_type,
+        'items': items,
+    }
+
+    return render(request, 'manageMarketplace.html', context)
+
+
+
+@login_required
+def createitem_view(request):
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    thisOrg = curProf.current_Org
+
+    if request.method == 'POST':
+        form = CreateItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            new_item = form.save(commit=False)
+            new_item.organization = thisOrg  # adding item to current org
+            new_item.save()
+            form.save_m2m()  
+            return redirect('manageMarketplace')
+    else:
+        form = CreateItemForm()
+
+    items = Item.objects.filter(organization=thisOrg)
+
+    context = {
+        'user_type': user_type,
+        'form': form,
+        'items': items,
+    }
+
+    return render(request, 'createitem.html', context)
+
+
+@login_required
+def delete_item_view(request, item_id):
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    thisOrg = curProf.current_Org
+
+    item = get_object_or_404(Item, id=item_id, organization=thisOrg)
+
+    if request.method == 'POST':
+        item.delete()
+        return redirect('manageMarketplace')
+    
+    return render(request, 'confirm_delete.html', {'item': item})
+
+

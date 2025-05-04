@@ -40,6 +40,7 @@ class Organization(models.Model):
     members = models.ManyToManyField(User, related_name='organizations', blank=True)
     pending_members = models.ManyToManyField(User, related_name='pending_organizations', blank=True)
     
+        
     def request_membership(self, user):
         if user not in self.members.all() and user not in self.pending_members.all():
             self.pending_members.add(user)
@@ -61,6 +62,27 @@ class Organization(models.Model):
     def __str__(self):
         return self.name
 
+#MARKET PLACE 
+#Pres/Treasurer use
+class Tag(models.Model):
+    name = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class Item(models.Model):
+    organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='items')
+    item_name = models.CharField(max_length=100, unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    image = models.FileField(upload_to='merchIMG/', null=True, blank=True)
+    quantity = models.PositiveIntegerField()
+    tags = models.ManyToManyField(Tag, related_name='items')
+
+    def __str__(self):
+        tag_names = ', '.join(tag.name for tag in self.tags.all())
+        return f"Item {self.item_name} (${self.price}). {self.quantity} left. Tags: {tag_names}."
+
+
 class Poll(models.Model):
     question = models.TextField()
     option_one = models.CharField(max_length=50)
@@ -69,6 +91,8 @@ class Poll(models.Model):
     option_one_count = models.IntegerField(default=0)
     option_two_count = models.IntegerField(default=0)
     option_three_count = models.IntegerField(default=0)
+    pub_date = models.DateTimeField()
+    expiration_date = models.DateTimeField()
 
     def total(self):
         return self.option_one_count + self.option_two_count + self.option_three_count
@@ -113,6 +137,7 @@ class CreateTicket(models.Model):
         choices=CATEGORY_CHOICES, 
         default = 'supplies',
     ) 
+    description = models.TextField(default = 'Description Here')
     receipt = models.FileField(upload_to='receipts/', null=True, blank=True)
     objects = TicketManager()
     
@@ -146,3 +171,13 @@ class FundingRequest(models.Model):
     
     def __str__(self):
         return f"{self.subject} (${self.amount}) - {self.status}"
+    
+
+
+
+
+
+
+
+ 
+    
