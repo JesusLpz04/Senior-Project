@@ -34,6 +34,13 @@
                     {% else %}
                         No image provided 
                     {% endif %}
+                    <form method="POST" class="view">
+                        {% csrf_token %}
+                        <input type="hidden" name="viewItem" value="item">
+                    </div>
+                    <button class="explore" name="item_id" value="{{item.id}}" >view</button>
+                </div>
+                    </form>
                 </td>
             </tr>
             {% endfor %}
