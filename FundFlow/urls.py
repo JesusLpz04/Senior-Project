@@ -30,7 +30,12 @@ urlpatterns = [
     path('fundingRequests/create/', views.create_funding_request, name='create_funding_request'),
     path('budgetReview/', views.budgetReview_view, name='budgetReview'),
     path('manageMarketplace/', views.manageMarketplace_view, name='manageMarketplace'),
+    path('createitem/', views.createitem_view, name='createitem'),
+    path('items/delete/<int:item_id>/', views.delete_item_view, name='delete_item'),
     path('joinOrganization/<org_id>', views.joinOrg_view, name='joinOrg'),
+    path('checkoutItem/<item_id>', views.checkout_view, name='checkout'),
+    path('payment-success/<item_id>', views.PaymentSuccessful, name='buyConfirm'),
+    path('payment-failed/<item_id>', views.Paymentfailed, name='buyDenied'),
     
 ]
 
