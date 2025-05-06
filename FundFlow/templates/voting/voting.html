@@ -6,6 +6,12 @@
         <div class="panel voting-panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Active Polls</h3>
+                <p class="paragraph">
+                    <i>What are polls?</i> <br>
+                    Polls are meant to make officer's desicions align with the needs and desires of members. Only officers 
+                    are able to create polls.
+                    <br>Polls are active for limited time, make sure your vote is accounted for!
+                </p>
                 <span class="createPoll">
                     <a href="{% url 'createPoll' %}" class="createPoll-btn btn-info btn-xs">Create New Poll</a> &nbsp;
                 </span>
@@ -15,6 +21,7 @@
                 {% for poll in polls %}
                 <li class="poll-list-item">
                     <strong class="poll-question">{{ poll.question }}</strong>
+                    <p>{{poll.expiration_date}}</p>
                     <span class="pull-right">
                         <a href="{% url 'voteForPoll' poll.id %}" class="vote-btn btn-info btn-xs">Vote</a> &nbsp;
                         <a href="{% url 'resultsPoll' poll.id %}" class="results-btn btn-default btn-xs">View Results</a> &nbsp;

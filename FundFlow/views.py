@@ -15,6 +15,7 @@ from paypal.standard.forms import PayPalPaymentsForm
 from django.conf import settings 
 import uuid
 from django.urls import reverse
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -241,12 +242,22 @@ def createticket_view(request):
 # Voting page views
 @login_required
 def voting_view(request):
-    polls = Poll.objects.all()
+    from django.utils import timezone
+    
+    current_time = timezone.now()
+    polls = Poll.objects.filter(expiration_date__gt=current_time)
+    
+    # Debug print
+    print(f"Current time: {current_time}")
+    print(f"Number of polls found: {polls.count()}")
+    for poll in polls:
+        print(f"Poll: {poll.question}, Expires: {poll.expiration_date}")
+    
     context = {
-        'polls' : polls
+        'polls': polls
     }
     template = loader.get_template('voting/voting.html')
-    return HttpResponse(template.render(context, request)) 
+    return HttpResponse(template.render(context, request))
 
 def createPoll_view(request):
     if request.method == 'POST':

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'paypal.standard.ipn',
+    'senior_project'
 
 ]
 
@@ -143,3 +144,4 @@ AUTHENTICATION_BACKENDS = [
 PAYPAL_RECEIVER_EMAIL = os.environ.get('PAYPAL_RECEIVER_EMAIL', 'sb-5padl41499918@business.example.com')
 
 PAYPAL_TEST = True
+
