@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm, CreateItemForm
-from .models import Poll, CreateTicket, UserProfile, Organization, Item, FundingRequest, TicketManager #, CartItem
+from .models import Poll, CreateTicket, UserProfile, Organization, Item, FundingRequest, Tag, TicketManager #, CartItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -480,14 +480,13 @@ def manageMarketplace_view(request):
 
     items = Item.objects.filter(organization=thisOrg)
 
-    # alltags = tag.name for tag in self.tags.all()
-    # alltags = Item.objects.get(tags)
-    
+    alltags = Tag.objects.all()
+
     context = {
         'thisOrg': thisOrg,
         'user_type': user_type,
         'items': items,
-        # 'alltags': alltags
+        'alltags': alltags
     }
 
     return render(request, 'manageMarketplace.html', context)

@@ -3,58 +3,80 @@
 {% block content %}
 
 
-<h1 id = "manage-org-title"> Manage {{thisOrg}} Marketplace</h1>
+<div class = "manage-org-title"> Manage {{thisOrg}} Marketplace</div>
 
-
-<div class ="manage-item-info-container"> 
+<div class = "manage-item-info-container">
+        
     <a id="create-item-btn" href="{% url 'createitem' %}">
-        <button class="create-item-btn-text" > + create item</button>
+        <button class="create-item-btn-text" > + Create New Item </button>
     </a> 
 
-    <label id="manage-item-search">Search for item </label>
-    <label id ="manage-filter-subtitle-label"> Keywords </label> 
-
-    {% comment %} tags {% endcomment %}
-    
-    {% comment %} {% for tag in alltags %}
-    {{alltags}}
-    {% end for %} {% endcomment %}
-
-    <label id = "filter-tags-label"> tagnamevari </label>
-
-    <div class =  "double-slider-box">
-        <label id = "manage-filter-subtitle-label"> Price </label> 
-        <div class = "range-slider">
-            <span class = "slider-track"> </span>
-            <input type = "range" name="min_val" class = "min-val" min = "1000" max = "12000" value = "2000">
-            <input type = "range" name="max_val" class = "max-val" min = "1000" max = "12000" value = "7000">
-            <div class = "tooltip min-tooltip"> </div>
-            <div class = "tooltip max-tooltip"> </div>
-        </div>
-        <div class = "input-box">
-            <div class = "min-box">
-                <div class = "input-wrap">
-                    <span class = "input-addon">$</span>
-                    <input type = "text" name = "min_input" class = "input-field min-input">
-                </div>
-            </div>
-
-            <div class = "max-box">
-                <div class = "input-wrap">
-                    <span class = "input-addon">$</span>
-                    <input type = "text" name = "max_input" class = "input-field max-input">
-                </div>
-            </div>
-        </div>
+    <div class = search-items> 
+        <input type="search-items" placeholder="Search..">
     </div>
 
+    <div class ="manage-item-filter-container"> 
+
+        <div class ="manage-filter-subtitle"> Keywords </div>
+
+        <div class="tag-container">
+            <form method="get">
+                {% for tag in alltags %}
+                <div class="tag-box">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" name="tags" value="{{ tag.id }}">
+                        {{ tag.name }}
+                        <span class="checkmark"></span>
+                    </label>
+                </div>
+                {% endfor %}
+
+                <button type="submit">Filter</button>
+
+                <a id="create-item-btn" href="{% url 'createitem' %}">
+                    <button class="create-item-btn-text" > Filter </button>
+                </a> 
+
+            </form>
+        </div>
+        
+        
+
+        <label id = "filter-tags-label"> tagnamevari </label>
+
+        <div class =  "double-slider-box">
+            <label id = "manage-filter-subtitle-label"> Price </label> 
+            <div class = "range-slider">
+                <span class = "slider-track"> </span>
+                <input type = "range" name="min_val" class = "min-val" min = "1000" max = "12000" value = "2000">
+                <input type = "range" name="max_val" class = "max-val" min = "1000" max = "12000" value = "7000">
+                <div class = "tooltip min-tooltip"> </div>
+                <div class = "tooltip max-tooltip"> </div>
+            </div>
+            <div class = "input-box">
+                <div class = "min-box">
+                    <div class = "input-wrap">
+                        <span class = "input-addon">$</span>
+                        <input type = "text" name = "min_input" class = "input-field min-input">
+                    </div>
+                </div>
+
+                <div class = "max-box">
+                    <div class = "input-wrap">
+                        <span class = "input-addon">$</span>
+                        <input type = "text" name = "max_input" class = "input-field max-input">
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 
-        {% comment %} Sort by {% endcomment %}
+
+            {% comment %} Sort by {% endcomment %}
 
 
-
+    </div>
 </div>
 
 <div>

@@ -1,34 +1,107 @@
 
-.manage-item-info-container {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-left: 1.5%;
+.manage-org-title{
+    text-align:left;
+    padding-left: 30px; 
+    margin-top: 30px;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.manage-item-info-container{
+    margin-top: 20px;
+    margin-left: 30px;
     width: 20%;
-    padding: 0;
-    border-radius: 15px;
-    border: 1px solid grey; 
 }
 
 .create-item-btn-text{
     border-radius: 12px;
     background-color: #053C5E; 
-    margin-top: 10px;
+    margin-top: 0px;
     color: white;
-    padding: 8px 15px;
+    padding: 15px;
     text-align: center;
     display: inline-block;
     font-size: 16px;
-    width: 15%;
+    width: 100%;
 }
 
-#manage-item-search {
-    display: block;
+.create-item-btn-text:hover {
+    background-color: #042a41;
+}
+
+input[type=search-items] {
+    padding: 6px;
+    width: 100%;
+    border-color: #D9D9D9;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-right: 16px;
+    margin-bottom:10px;
+    font-size: 17px;
+}
+
+.manage-item-filter-container {
+    margin-bottom: 0;
+    width: 100%;
+    border-radius: 15px;
+    border: 1px solid grey; 
+    display:inline-block;
+}
+
+.manage-filter-subtitle{
+    padding-top: 5%;
+    padding-left: 5%;
+    font-size: 16px;
+    font-weight: bold;
 
 }
 
-#manage-item-search {
-    margin-left: 0.5%;
-    margin-top: 3%;
+.tag-container{
+    padding-top: 1%;
+    padding-left: 5%; 
+    padding-right:5%;
+}
+
+.tag-box{
+    border-radius:10px;
+    font-size: 16px;
+    background-color: #D9D9D9;
+    margin-bottom: 3%;
+    margin-right: 3%;
+    display:inline-block;
+    padding: 3%;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.custom-checkbox .checkmark {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border: 1px solid black;
+    display: inline-block;
+    margin-right: 8px;
+    margin-left:8px;
+    position: relative;
+    vertical-align: middle;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: .5px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkmark {
+    background-color: #053C5E;
 }
 
 
