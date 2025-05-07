@@ -11,6 +11,10 @@ from .models import Poll, CreateTicket, UserProfile, Organization, Item, Funding
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
+from paypal.standard.forms import PayPalPaymentsForm
+from django.conf import settings 
+import uuid
+from django.urls import reverse
 from django.utils import timezone
 from .decorators import unauthorized_user, allowed_users
 
@@ -182,6 +186,9 @@ def dashboard_view(request):
             print(curProf.current_Org)
             if current_user == curProf.current_Org.president:
                 curProf.user_type= 'president'
+                curProf.save()
+            elif current_user == curProf.current_Org.treasurer:
+                curProf.user_type= 'treasurer'
                 curProf.save()
             else:
                 curProf.user_type='member'
@@ -505,7 +512,13 @@ def marketplace_view(request):
     user_type = curProf.user_type
     thisOrg = curProf.current_Org
     
-    items = Item.objects.all()  
+    items = Item.objects.all()
+
+    if request.method == 'POST':
+        item_id = request.POST.get('item_id')
+        print(item_id)
+        item=Item.objects.get(pk=item_id)
+        return redirect('checkout', item.id)
 
     context = {
         'user_type': user_type,
@@ -513,6 +526,41 @@ def marketplace_view(request):
     }
     return render(request, 'marketplace.html', context)
 
+def checkout_view(request,item_id):
+    itm = Item.objects.get(pk=item_id)
+
+    host = request.get_host()
+
+    org=itm.organization
+
+    orgEmail=org.bank_email
+    print(orgEmail)
+    paypal_checkout ={
+        'business': orgEmail,
+        'amount':itm.price,
+        'item_name': itm.item_name,
+        'invoice': uuid.uuid4(),
+        'currency_code': 'USD',
+        'notify_url': f"http://{host}{reverse('paypal-ipn')}",
+        'return_url': f"http://{host}{reverse('buyConfirm', kwargs ={'item_id':itm.id})}",
+        'cancel_url': f"http://{host}{reverse('buyDenied', kwargs ={'item_id':itm.id})}"
+    }
+
+    paypal_payment= PayPalPaymentsForm(initial = paypal_checkout)
+
+    context={
+        'itm':itm,
+        'paypal':paypal_payment
+    }
+    return render(request, 'checkout.html', context)
+
+def PaymentSuccessful(request,item_id):
+    item = Item.objects.get(pk=item_id)
+    return render(request, 'buyConfirm.html', {'item': item})
+
+def Paymentfailed(request,item_id):
+    item = Item.objects.get(pk=item_id)
+    return render(request, 'buyDenied.html', {'item': item})
 @login_required
 @allowed_users(allowed_roles=['president', 'treasurer'])
 def manageMarketplace_view(request):
