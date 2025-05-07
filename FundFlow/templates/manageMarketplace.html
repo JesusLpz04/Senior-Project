@@ -3,6 +3,20 @@
 {% block content %}
 <h1>Manage Marketplace</h1>
 <h2>Organization {{thisOrg}} </h2>
+<div> 
+    Current Email: {{thisOrg.bank_email}}
+    <div class="container"> 
+        Add or change Paypay Business Email:
+        <form method="POST" class="addEmail-form">
+            {% csrf_token %}
+            <input type="hidden" name="addEmail" value="email">
+            <input type="text" id="text-label" name="addE" placeholder="Add Email">
+            <button class="explore" name="addEmailBtn"  >Add/change</button>
+        </form>
+    </div>
+
+
+</div>
 <a id="create-item-btn-label" href="{% url 'createitem' %}">
     <button class="create-item-btn" >+ create item</button>
 </a> 

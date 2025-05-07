@@ -47,9 +47,11 @@ main {
     margin-top: 10px;
 }
 .org-item {
+    display: flex;
+    justify-content: space-between;
     background-color: #F8F5F0;
     padding: 5px;
-    border-radius: 5px;
+    border-radius: 10px;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
 }
 
@@ -106,4 +108,52 @@ main {
     color: blue;
     cursor: pointer;
     text-decoration: underline;
+}
+
+.expand:hover{
+    color: #2a668b;
+}
+
+.explore-btn{
+    font-family: 'Overpass', sans-serif;
+    font-size: medium;
+    padding: 5px 10px 5px 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    background-color: #053C5E;
+    color: white;
+    border: 0px;
+}
+
+.explore-btn:hover{
+    background-color: #2a668b;
+}
+
+.view-btn{
+    display: flex;
+    padding: 5px 10px 5px 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    background-color: #F8F5F0;
+    color: #053C5E;
+    border: 1px solid #d5d9d9;
+}
+
+.view-btn:hover{
+    border-color: #008296;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    outline: 0;
+}
+
+.show-belong-org-name{
+    font-weight: bold;
+    padding-bottom: 5px;
+    padding-left: 5px;
+
+}
+
+.show-belong-org-description{
+    padding-left: 5px;
+    padding-bottom: 10px;
+
 }
