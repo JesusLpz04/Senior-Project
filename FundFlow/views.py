@@ -471,14 +471,28 @@ def marketplace_view(request):
     }
     return render(request, 'marketplace.html', context)
 
+
 @login_required
 def manageMarketplace_view(request):
+    selected_tag_ids = request.GET.getlist('tags')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
     thisOrg = curProf.current_Org
 
+    #for item cards
     items = Item.objects.filter(organization=thisOrg)
+
+    #for filter
+    if selected_tag_ids:
+        items = items.filter(tags__id__in=selected_tag_ids).distinct()
+    if min_price:
+        items = items.filter(price__gte=min_price)
+    if max_price:
+        items = items.filter(price__lte=max_price)
 
     alltags = Tag.objects.all()
 
@@ -486,10 +500,15 @@ def manageMarketplace_view(request):
         'thisOrg': thisOrg,
         'user_type': user_type,
         'items': items,
-        'alltags': alltags
+        'alltags': alltags,
+        'selected_tag_ids': list(map(int, selected_tag_ids)),  # Pass as list of integers
+        'min_price': min_price,
+        'max_price': max_price
     }
 
     return render(request, 'manageMarketplace.html', context)
+
+
 
 
 
