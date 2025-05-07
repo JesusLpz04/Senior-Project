@@ -31,7 +31,7 @@
         <div class="signup-form-container">
             <div class="signup-form">
                 <h1>Sign Up!</h1>
-                <p>Sign up with your UTRGV credentials</p>
+                <p class="credentials-statement">Please sign up using your UTRGV credentials</p>
                 <form method="POST" action="">
                     {% csrf_token %}
                     
@@ -93,6 +93,7 @@
                         {% endif %}
                     </div>
                     <button type="submit" class="signup-btn">Create Profile</button>
+                    <p class="register-link">Already have an account? <a href="{% url 'home' %}">Log in</a></p>
                 </form>
             </div>
         </div>

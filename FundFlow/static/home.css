@@ -199,3 +199,8 @@ body {
 .signin-btn:hover {
     background-color: #2a668b;
 }
+
+.credentials-statement {
+    display: flex;
+    justify-content: center;
+}

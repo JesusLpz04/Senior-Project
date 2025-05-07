@@ -94,6 +94,21 @@ class Poll(models.Model):
     pub_date = models.DateTimeField()
     expiration_date = models.DateTimeField()
 
+    # Add organization field
+    organization = models.ForeignKey(
+        'Organization', 
+        on_delete=models.CASCADE, 
+        related_name='polls',
+        null=True  # Make it nullable for existing records
+    )
+    # Track who created the poll
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='created_polls',
+        null=True
+    )
+
     def total(self):
         return self.option_one_count + self.option_two_count + self.option_three_count
 
