@@ -31,7 +31,7 @@
 }
 
 .create-ticket-btn {
-    border-radius: 12px;
+    border-radius: 5px;
     background-color: #053C5E; 
     margin-top: 10px;
     color: white;
@@ -40,6 +40,7 @@
     display: inline-block;
     font-size: 16px;
     width: 15%;
+    border: 0px;
 }
 
 .create-ticket-btn:hover {
