@@ -212,6 +212,9 @@ def expenses_view(request):
     balance = CreateTicket.objects.get_balance()
     running_balance = Decimal('0.00')
     ticket_data = []
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
 
     for ticket in tickets:
         operation_symbol = '+' if ticket.operation == 'add' else '-'  
@@ -225,7 +228,7 @@ def expenses_view(request):
 
     return render(request, 'expenses.html', {
     'tickets_with_balance': list(reversed(ticket_data)),  
-    'balance': balance  
+    'balance': balance, 'user_type':user_type  
     })
     
 @login_required
@@ -411,9 +414,12 @@ def manageOrg_view(request):
 def fundingRequests_view(request):
     # Get all funding requests for display
     funding_requests = FundingRequest.objects.all().order_by('-created_at')
-    
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
     context = {
-        'funding_requests': funding_requests
+        'funding_requests': funding_requests,
+        'user_type': user_type
     }
     template = loader.get_template('fundingRequests.html')
     return HttpResponse(template.render(context, request))
@@ -457,10 +463,15 @@ def create_funding_request(request):
 @allowed_users(allowed_roles=['president', 'treasurer'])
 def budgetReview_view(request):
     ticks=CreateTicket.objects.all()
-    print(ticks)
-    labels = ', '.join(f'"{i.expense_category}"' for i in ticks)
-    values = ', '.join(str(i.amount) for i in ticks)
-    print(labels)
+    category_totals = {}
+    for ticket in ticks:
+        if ticket.expense_category in category_totals:
+            category_totals[ticket.expense_category] += ticket.amount
+        else:
+            category_totals[ticket.expense_category] = ticket.amount
+
+    labels = ', '.join(f'"{label}"' for label in category_totals.keys())
+    values = ', '.join(str(value) for value in category_totals.values())
     # for i in ticks:
     #     print(i.confirmation.join(","))
 
@@ -570,6 +581,12 @@ def manageMarketplace_view(request):
     thisOrg = curProf.current_Org
 
     items = Item.objects.filter(organization=thisOrg)
+    if request.method == 'POST':
+        newEmail=request.POST.get('addE')
+        if newEmail != "":
+        # orgs = Organization.objects.filter(name__icontains=inp)
+            thisOrg.bank_email=newEmail
+            thisOrg.save()
 
     context = {
         'thisOrg': thisOrg,
