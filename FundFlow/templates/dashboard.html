@@ -25,9 +25,9 @@
                         {{ form|crispy }}
                         <input type="hidden" name="dashb" value="search">
                         <input type="text" id="text-label" name="seb" placeholder="Search...">
-                        <button class="explore" name="searchBtn"  >search</button>
+                        <button class="explore explore-btn" name="searchBtn"  >search</button>
                     </form>
-                    <p>Or browse by name:</p>
+                    <p><br>Or browse by name:</p>
                     <div class="org-grid">
 
 
@@ -36,7 +36,7 @@
                             {% csrf_token %}
                             {{ form|crispy }}
                             <input type="hidden" name="dashb" value="viewJoin">
-                            <div class="org-item" btn="org-item" >{{org.name}}<button class="org-btn" name="org_id" value="{{org.id}}">view</button></div>  
+                            <div class="org-item" btn="org-item" >{{org.name}}<button class="org-btn view-btn" name="org_id" value="{{org.id}}">view</button></div>  
                         </form>
                         <!-- <div class="org-item">Org 2</div>
                         <div class="org-item">Org 3</div>
@@ -67,7 +67,7 @@
                         <div class="show-belong-org-description">
                             {{apt.description}}
                         </div>
-                        <button class="explore" name="apt_id" value="{{apt.id}}" >explore</button>
+                        <button class="explore explore-btn" name="apt_id" value="{{apt.id}}" >explore</button>
                     </div>
             </div>
             </form>
@@ -76,7 +76,7 @@
             {% for apt in pendsOrgs %}
             <div class="info-container">
                     <div class="apart-of">
-                        <div class="show-belong-org-name">{{apt.name}}</div>
+                        <div class="show-belong-org-name ">{{apt.name}}</div>
                         <div class="show-belong-org-description">
                             {{apt.description}}
                         </div>
