@@ -16,6 +16,7 @@ from django.conf import settings
 import uuid
 from django.urls import reverse
 from django.utils import timezone
+from .decorators import unauthorized_user, allowed_users
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ def check_auth(request):
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
 
+@unauthorized_user
 def home_logIn(request):
     if request.method == 'POST':
         email = request.POST.get('email')  # Changed from username to email
@@ -59,6 +61,7 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+@unauthorized_user
 @csrf_protect
 def signup_view(request):
     if request.method == 'POST':
@@ -136,7 +139,6 @@ def register_org(request):
                 print(cur_prof.user_type)
 
             return redirect('dashboard')
-    # dropdown_options = ["Org 1", "Org 2", "Org 3", "Org 4", "Org 5"]  #Hardcoded data for now 
 
     return render(request, "registerorg.html", {"options": dropdown_options})
 
@@ -240,38 +242,65 @@ def createticket_view(request):
     return render(request, 'createTicket.html', {'form': form})
 
 # Voting page views
+
 @login_required
 def voting_view(request):
+
     from django.utils import timezone
+    from collections import defaultdict
     
     current_time = timezone.now()
-    polls = Poll.objects.filter(expiration_date__gt=current_time)
+    current_user = request.user
     
-    # Debug print
-    print(f"Current time: {current_time}")
-    print(f"Number of polls found: {polls.count()}")
-    for poll in polls:
-        print(f"Poll: {poll.question}, Expires: {poll.expiration_date}")
+    try:
+        curProf = UserProfile.objects.get(user=current_user)
+        user_type = curProf.user_type
+        
+        # Get organizations the user is a member of
+        user_orgs = Organization.objects.filter(members=current_user)
+        
+        # Get polls for those organizations that are still active
+        polls_by_org = defaultdict(list)
+        
+        for org in user_orgs:
+            org_polls = Poll.objects.filter(
+                organization=org,
+                expiration_date__gt=current_time
+            )
+            
+            if org_polls.exists():
+                polls_by_org[org] = org_polls
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        user_type = None
+        polls_by_org = {}
     
     context = {
-        'polls': polls
+        'polls_by_org': dict(polls_by_org),
+        'user_type': user_type,
+        'user_orgs': user_orgs
     }
+
     template = loader.get_template('voting/voting.html')
     return HttpResponse(template.render(context, request))
 
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def createPoll_view(request):
     if request.method == 'POST':
-        form = CreatePollForm(request.POST)
+        form = CreatePollForm(request.POST, user=request.user)
         if form.is_valid():
-            form.save()
+            poll = form.save(commit=False)
+            poll.created_by = request.user  # Track who created the poll
+            poll.save()
             return redirect('voting')
     else:
-        form = CreatePollForm()
+        form = CreatePollForm(user=request.user)
+    
     context = {
-        'form' : form
+        'form': form
     }
-    template = loader.get_template('voting/createPoll.html')
-    return HttpResponse(template.render(context, request))
+    return render(request, 'voting/createPoll.html', context)
 
 def voteForPoll_view(request, poll_id):
     poll = Poll.objects.get(pk=poll_id)
@@ -308,6 +337,7 @@ def resultsPoll_view(request, poll_id):
 
 
 @login_required
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def manageOrg_view(request):
     curUser=request.user
     inOrg=Organization.objects.filter(president=curUser)
@@ -424,6 +454,7 @@ def create_funding_request(request):
         }, status=500)
 
 @login_required
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def budgetReview_view(request):
     ticks=CreateTicket.objects.all()
     print(ticks)
@@ -531,6 +562,7 @@ def Paymentfailed(request,item_id):
     item = Item.objects.get(pk=item_id)
     return render(request, 'buyDenied.html', {'item': item})
 @login_required
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def manageMarketplace_view(request):
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
