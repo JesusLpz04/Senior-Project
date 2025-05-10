@@ -485,6 +485,12 @@ def manageMarketplace_view(request):
 
     #for item cards
     items = Item.objects.filter(organization=thisOrg)
+    
+    #for search through items
+    search_query = request.GET.get('search')
+    if search_query:
+        items = items.filter(item_name__icontains=search_query)  # adjust "name" to your item model's search-relevant field
+
 
     #for filter
     if selected_tag_ids:
@@ -493,17 +499,29 @@ def manageMarketplace_view(request):
         items = items.filter(price__gte=min_price)
     if max_price:
         items = items.filter(price__lte=max_price)
+        
+    #for sort by
+    sort_option = request.GET.get('sort')
+    if sort_option == 'price_asc':
+        items = items.order_by('price')
+    elif sort_option == 'price_desc':
+        items = items.order_by('-price')
+
 
     alltags = Tag.objects.all()
+    
 
     context = {
         'thisOrg': thisOrg,
         'user_type': user_type,
         'items': items,
         'alltags': alltags,
-        'selected_tag_ids': list(map(int, selected_tag_ids)),  # Pass as list of integers
+        'selected_tag_ids': list(map(int, selected_tag_ids)),  
+        'selected_tags_raw': selected_tag_ids,
         'min_price': min_price,
-        'max_price': max_price
+        'max_price': max_price, 
+        'search_query': search_query, 
+        'sort_option': sort_option
     }
 
     return render(request, 'manageMarketplace.html', context)

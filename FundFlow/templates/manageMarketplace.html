@@ -12,15 +12,11 @@
             <button class="create-item-btn-text" > + Create New Item </button>
         </a> 
 
-        <div class = search-items> 
-            <input type="search-items" placeholder="Search..">
-        </div>
-
         <div class ="manage-item-filter-container"> 
 
             <div class ="manage-filter-subtitle"> Keywords </div>
 
-            <form method="get">
+            <form method="get" class="filter-form">
                 <div class="tag-container">
                     {% for tag in alltags %}
                     <div class="tag-box">
@@ -37,17 +33,40 @@
                 <div class="price-slider-container">
                     <label class="price-slider-label">Price Range</label>
                     <div class="price-inputs">
-                        <div class="input-group">
+                        <div class="price-input-group">
                             <span>$</span>
                             <input type="number" name="min_price" id="min-input" value="{{ request.GET.min_price|default:0 }}">
                         </div>
-                        <div class="input-group">
+                        <div class="price-input-group">
                             <span>$</span>
                             <input type="number" name="max_price" id="max-input" value="{{ request.GET.max_price|default:300 }}">
                         </div>
                     </div>
                 </div>
             
+                <div class="sort-options">
+                    <div class="sort-label">Sort by:</div>
+                
+                    <label class="radio-option">
+                        <input type="radio" name="sort" value="" {% if not request.GET.sort %}checked{% endif %}>
+                        <span class="radio-circle"></span>
+                        <span class="radio-label">None</span>
+                    </label>
+                
+                    <label class="radio-option">
+                        <input type="radio" name="sort" value="price_asc" {% if request.GET.sort == 'price_asc' %}checked{% endif %}>
+                        <span class="radio-circle"></span>
+                        <span class="radio-label">Price: low to high</span>
+                    </label>
+                
+                    <label class="radio-option">
+                        <input type="radio" name="sort" value="price_desc" {% if request.GET.sort == 'price_desc' %}checked{% endif %}>
+                        <span class="radio-circle"></span>
+                        <span class="radio-label">Price: high to low</span>
+                    </label>
+                </div>
+                
+                                    
                 <button type="submit" class="filter-item-btn-text">Filter</button>
             </form>
             
@@ -58,51 +77,63 @@
             </div>
             
         </div>
-
-
-        {% comment %} Sort by {% endcomment %}
-
     </div>
 
 
 
-    <div class="item-cards-container"> 
+    <div class="item-cards-container">
+        
+        <form class="search-items" method="get" action="">
+            <input type="text" name="search" placeholder="Search...">
+            <button type="submit">
+                <i class="fa fa-search" style="font-size:20px"></i>
+            </button>
+        </form>
+        
         <div class="item-grid">
-            {% for item in items %}
-            <div class="item-card">
-                <div class="item-image">
-                    {% if item.image %}
-                        <a href="#" class="image-link" data-image="{{ item.image.url }}">
-                            <img src="{{ item.image.url }}" alt="{{ item.item_name }}">
-                        </a>
-                    {% else %}
-                        <div class="image-placeholder"> ------------ No image ------------</div>
-                    {% endif %}
-                </div>
-    
-                <div class="item-name-row">
-                    <div class="item-name-text">{{ item.item_name }}</div>
-                    <div class="remove-item">
-                        <a href="{% url 'delete_item' item.id %}">❌</a>
+            {%if items%}
+                {% for item in items %}
+                <div class="item-card">
+                    <div class="item-image">
+                        {% if item.image %}
+                            <a href="#" class="image-link" data-image="{{ item.image.url }}">
+                                <img src="{{ item.image.url }}" alt="{{ item.item_name }}">
+                            </a>
+                        {% else %}
+                            <div class="image-placeholder"> ------------ No image ------------</div>
+                        {% endif %}
+                    </div>
+        
+                    <div class="item-name-row">
+                        <div class="item-name-text">{{ item.item_name }}</div>
+                        <div class="remove-item">
+                            <a href="{% url 'delete_item' item.id %}">
+                                <i class="fa">&#xf014;</i>
+                            </a>
+                        </div>
+                    </div>
+        
+                    <div class="item-details-row">
+                        <div class="item-price">${{ item.price }}</div>
+                        <div class="item-quantity">{{ item.quantity }} left</div>
+                        <div class="edit-item"><i class="fa fa-edit" style="font-size:18px"></i></div>
+                    </div>
+        
+                    <div class="item-tags">
+                        Tags: 
+                        {% for tag in item.tags.all %}
+                            {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            No tags
+                        {% endfor %}
                     </div>
                 </div>
-    
-                <div class="item-details-row">
-                    <div class="item-price">${{ item.price }}</div>
-                    <div class="item-quantity">{{ item.quantity }} left</div>
-                    <div class="edit-item">✏️</div>
-                </div>
-    
-                <div class="item-tags">
-                    Tags: 
-                    {% for tag in item.tags.all %}
-                        {{ tag.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                        No tags
-                    {% endfor %}
-                </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            {% elif search_query %}
+                <div class = "no-items"> No results, try a different search. </div>
+            {%else%}
+                <div class = "no-items"> You currently have no items on marketplace. Use the Create Item to list your items</div>
+            {%endif%}
         </div>
     </div>
 
