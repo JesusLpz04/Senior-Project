@@ -278,6 +278,8 @@ def voting_view(request):
         print(f"Error: {str(e)}")
         user_type = None
         polls_by_org = {}
+        
+    print("Polls by org:", polls_by_org)
     
     context = {
         'polls_by_org': dict(polls_by_org),
@@ -572,6 +574,7 @@ def PaymentSuccessful(request,item_id):
 def Paymentfailed(request,item_id):
     item = Item.objects.get(pk=item_id)
     return render(request, 'buyDenied.html', {'item': item})
+
 @login_required
 @allowed_users(allowed_roles=['president', 'treasurer'])
 def manageMarketplace_view(request):
