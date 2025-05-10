@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'crispy_forms',
     'crispy_bootstrap4',
+    'paypal.standard.ipn',
+    'senior_project'
 
 ]
 
@@ -139,3 +141,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+PAYPAL_RECEIVER_EMAIL = os.environ.get('PAYPAL_RECEIVER_EMAIL', 'sb-5padl41499918@business.example.com')
+
+PAYPAL_TEST = True
+

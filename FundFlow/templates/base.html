@@ -34,7 +34,9 @@
            
           <div id="side-menu" class="side-menu">
               <a href="#" class="close-btn" onclick="closeMenu()">&times;</a>
+              {% if user_type == "president" %}
               <a href="{% url 'manageOrg' %}">Manage Org.</a>
+              {% endif %}
               <a href="{% url 'budgetReview' %}">Budget Review</a>
               <a href="{% url 'manageMarketplace' %}">Manage Marketplace</a>
           </div>
@@ -50,7 +52,7 @@
       </div>
       <div>
         {% if user.is_authenticated %}
-        <a> Hello, {{user.first_name}} </a>
+        <a class="hello-user"> Hello, {{user.first_name}}! </a>
         <form action="{% url 'logout' %}" method="post">
           {% csrf_token %}
           <button type="submit" class="logout-btn">Log Out</button>
@@ -67,7 +69,7 @@
                 <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link link-body-emphasis px-2" aria-current="page">Dashboard</a></li>
                 <li class="nav-item"><a href="{% url 'expenses' %}" class="nav-link link-body-emphasis px-2">Expenses</a></li>
                 <li class="nav-item"><a href="{% url 'fundingRequests' %}" class="nav-link link-body-emphasis px-2">Funding Requests</a></li>
-                <li class="nav-item"><a href="{% url 'voting' %}" class="nav-link link-body-emphasis px-2">Voting</a></li>
+                <li class="nav-item"><a href="{% url 'voting' %}" class="nav-link link-body-emphasis px-2">Polls</a></li>
                 <li class="nav-item"><a href="{% url 'marketplace' %}" class="nav-link link-body-emphasis px-2">Marketplace</a></li>
                 <!-- <li class="nav-item"><a href="#" class="nav-link link-body-emphasis px-2">About</a></li> -->
             </ul>

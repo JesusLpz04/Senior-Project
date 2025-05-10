@@ -5,6 +5,19 @@
 
 <div class = "manage-org-title"> Manage {{thisOrg}} Marketplace</div>
 
+<div> 
+    Current Email: {{thisOrg.bank_email}}
+    <div class="container"> 
+        Add or change Paypay Business Email:
+        <form method="POST" class="addEmail-form">
+            {% csrf_token %}
+            <input type="hidden" name="addEmail" value="email">
+            <input type="text" id="text-label" name="addE" placeholder="Add Email">
+            <button class="explore" name="addEmailBtn"  >Add/change</button>
+        </form>
+    </div>
+</div>
+
 <div class = "manage-org-contents">
 
     <div class = "manage-item-info-container">

@@ -37,8 +37,10 @@ class Organization(models.Model):
     name= models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     president = models.ForeignKey(User, on_delete=models.CASCADE, related_name='president_of', blank=True, null=True)
+    treasurer = models.ForeignKey(User, on_delete=models.SET_NULL ,related_name='treasurer_of', blank=True, null=True)
     members = models.ManyToManyField(User, related_name='organizations', blank=True)
     pending_members = models.ManyToManyField(User, related_name='pending_organizations', blank=True)
+    bank_email= models.EmailField(verbose_name='Email Address', unique=False, blank=True, null=True)
     
         
     def request_membership(self, user):
@@ -91,6 +93,23 @@ class Poll(models.Model):
     option_one_count = models.IntegerField(default=0)
     option_two_count = models.IntegerField(default=0)
     option_three_count = models.IntegerField(default=0)
+    pub_date = models.DateTimeField()
+    expiration_date = models.DateTimeField()
+
+    # Add organization field
+    organization = models.ForeignKey(
+        'Organization', 
+        on_delete=models.CASCADE, 
+        related_name='polls',
+        null=True  # Make it nullable for existing records
+    )
+    # Track who created the poll
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='created_polls',
+        null=True
+    )
 
     def total(self):
         return self.option_one_count + self.option_two_count + self.option_three_count

@@ -76,7 +76,7 @@ body{
 
 .requestFunds-btn{
     text-decoration: none;
-    border-radius: 15px;
+    border-radius: 5px;
     background-color:  #053C5E;
     color: white;
     padding: 5px 10px 5px 10px;
@@ -181,7 +181,7 @@ body{
     color: white;
     border: none;
     padding: 8px 16px;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
@@ -193,3 +193,5 @@ body{
     text-align: center;
     color: #6c757d;
 }
+
+

@@ -42,11 +42,12 @@ body {
     text-decoration: none;
     color: #053C5E;
     padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 16px;
+    border-radius: 25px;
+    font-size: 14px;
     text-align: center;
     cursor: pointer;
     box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.3);
+    margin-top: 3px;
 }
 
 .logout-btn:hover{
@@ -118,11 +119,17 @@ nav {
     padding: 5px 10px;
     transition: color 0.3s ease;
     font-family: 'Overpass', sans-serif;
-    font-weight: 300; /* Ensure it matches the defined weight */
+    font-weight: 300; 
 }
 
 .nav-link:hover,
 .nav-link.active {
     color: #adb5bd; /* Lighter gray */
+}
+
+.hello-user {
+    font-family: 'Overpass', sans-serif;
+    color: #F8F5F0;
+
 }
 

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+    <head>
+    </head>
+
+
+    <div class="reg-container">
+
+
+        <main>
+            <div>{{ itm.item_name}}</div>
+            <div>{{ itm.price}}</div>
+            {{ paypal.render }}
+        </main>
+    </div>
+{% endblock %}

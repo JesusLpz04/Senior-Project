@@ -11,6 +11,12 @@ from .models import Poll, CreateTicket, UserProfile, Organization, Item, Funding
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
+from paypal.standard.forms import PayPalPaymentsForm
+from django.conf import settings 
+import uuid
+from django.urls import reverse
+from django.utils import timezone
+from .decorators import unauthorized_user, allowed_users
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +31,7 @@ def check_auth(request):
 def fund_flow(request):
     return HttpResponse("Hello, this is your fundflow method!")
 
+@unauthorized_user
 def home_logIn(request):
     if request.method == 'POST':
         email = request.POST.get('email')  # Changed from username to email
@@ -54,6 +61,7 @@ def logout_view(request):
     logout(request)
     return redirect('home')
 
+@unauthorized_user
 @csrf_protect
 def signup_view(request):
     if request.method == 'POST':
@@ -131,7 +139,6 @@ def register_org(request):
                 print(cur_prof.user_type)
 
             return redirect('dashboard')
-    # dropdown_options = ["Org 1", "Org 2", "Org 3", "Org 4", "Org 5"]  #Hardcoded data for now 
 
     return render(request, "registerorg.html", {"options": dropdown_options})
 
@@ -180,6 +187,9 @@ def dashboard_view(request):
             if current_user == curProf.current_Org.president:
                 curProf.user_type= 'president'
                 curProf.save()
+            elif current_user == curProf.current_Org.treasurer:
+                curProf.user_type= 'treasurer'
+                curProf.save()
             else:
                 curProf.user_type='member'
                 curProf.save()
@@ -202,6 +212,9 @@ def expenses_view(request):
     balance = CreateTicket.objects.get_balance()
     running_balance = Decimal('0.00')
     ticket_data = []
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
 
     for ticket in tickets:
         operation_symbol = '+' if ticket.operation == 'add' else '-'  
@@ -215,7 +228,7 @@ def expenses_view(request):
 
     return render(request, 'expenses.html', {
     'tickets_with_balance': list(reversed(ticket_data)),  
-    'balance': balance  
+    'balance': balance, 'user_type':user_type  
     })
     
 @login_required
@@ -232,28 +245,65 @@ def createticket_view(request):
     return render(request, 'createTicket.html', {'form': form})
 
 # Voting page views
+
 @login_required
 def voting_view(request):
-    polls = Poll.objects.all()
-    context = {
-        'polls' : polls
-    }
-    template = loader.get_template('voting/voting.html')
-    return HttpResponse(template.render(context, request)) 
 
+    from django.utils import timezone
+    from collections import defaultdict
+    
+    current_time = timezone.now()
+    current_user = request.user
+    
+    try:
+        curProf = UserProfile.objects.get(user=current_user)
+        user_type = curProf.user_type
+        
+        # Get organizations the user is a member of
+        user_orgs = Organization.objects.filter(members=current_user)
+        
+        # Get polls for those organizations that are still active
+        polls_by_org = defaultdict(list)
+        
+        for org in user_orgs:
+            org_polls = Poll.objects.filter(
+                organization=org,
+                expiration_date__gt=current_time
+            )
+            
+            if org_polls.exists():
+                polls_by_org[org] = org_polls
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        user_type = None
+        polls_by_org = {}
+    
+    context = {
+        'polls_by_org': dict(polls_by_org),
+        'user_type': user_type,
+        'user_orgs': user_orgs
+    }
+
+    template = loader.get_template('voting/voting.html')
+    return HttpResponse(template.render(context, request))
+
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def createPoll_view(request):
     if request.method == 'POST':
-        form = CreatePollForm(request.POST)
+        form = CreatePollForm(request.POST, user=request.user)
         if form.is_valid():
-            form.save()
+            poll = form.save(commit=False)
+            poll.created_by = request.user  # Track who created the poll
+            poll.save()
             return redirect('voting')
     else:
-        form = CreatePollForm()
+        form = CreatePollForm(user=request.user)
+    
     context = {
-        'form' : form
+        'form': form
     }
-    template = loader.get_template('voting/createPoll.html')
-    return HttpResponse(template.render(context, request))
+    return render(request, 'voting/createPoll.html', context)
 
 def voteForPoll_view(request, poll_id):
     poll = Poll.objects.get(pk=poll_id)
@@ -290,6 +340,7 @@ def resultsPoll_view(request, poll_id):
 
 
 @login_required
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def manageOrg_view(request):
     curUser=request.user
     inOrg=Organization.objects.filter(president=curUser)
@@ -363,9 +414,12 @@ def manageOrg_view(request):
 def fundingRequests_view(request):
     # Get all funding requests for display
     funding_requests = FundingRequest.objects.all().order_by('-created_at')
-    
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
     context = {
-        'funding_requests': funding_requests
+        'funding_requests': funding_requests,
+        'user_type': user_type
     }
     template = loader.get_template('fundingRequests.html')
     return HttpResponse(template.render(context, request))
@@ -406,12 +460,18 @@ def create_funding_request(request):
         }, status=500)
 
 @login_required
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def budgetReview_view(request):
     ticks=CreateTicket.objects.all()
-    print(ticks)
-    labels = ', '.join(f'"{i.expense_category}"' for i in ticks)
-    values = ', '.join(str(i.amount) for i in ticks)
-    print(labels)
+    category_totals = {}
+    for ticket in ticks:
+        if ticket.expense_category in category_totals:
+            category_totals[ticket.expense_category] += ticket.amount
+        else:
+            category_totals[ticket.expense_category] = ticket.amount
+
+    labels = ', '.join(f'"{label}"' for label in category_totals.keys())
+    values = ', '.join(str(value) for value in category_totals.values())
     # for i in ticks:
     #     print(i.confirmation.join(","))
 
@@ -463,7 +523,13 @@ def marketplace_view(request):
     user_type = curProf.user_type
     thisOrg = curProf.current_Org
     
-    items = Item.objects.all()  
+    items = Item.objects.all()
+
+    if request.method == 'POST':
+        item_id = request.POST.get('item_id')
+        print(item_id)
+        item=Item.objects.get(pk=item_id)
+        return redirect('checkout', item.id)
 
     context = {
         'user_type': user_type,
@@ -471,8 +537,43 @@ def marketplace_view(request):
     }
     return render(request, 'marketplace.html', context)
 
+def checkout_view(request,item_id):
+    itm = Item.objects.get(pk=item_id)
 
+    host = request.get_host()
+
+    org=itm.organization
+
+    orgEmail=org.bank_email
+    print(orgEmail)
+    paypal_checkout ={
+        'business': orgEmail,
+        'amount':itm.price,
+        'item_name': itm.item_name,
+        'invoice': uuid.uuid4(),
+        'currency_code': 'USD',
+        'notify_url': f"http://{host}{reverse('paypal-ipn')}",
+        'return_url': f"http://{host}{reverse('buyConfirm', kwargs ={'item_id':itm.id})}",
+        'cancel_url': f"http://{host}{reverse('buyDenied', kwargs ={'item_id':itm.id})}"
+    }
+
+    paypal_payment= PayPalPaymentsForm(initial = paypal_checkout)
+
+    context={
+        'itm':itm,
+        'paypal':paypal_payment
+    }
+    return render(request, 'checkout.html', context)
+
+def PaymentSuccessful(request,item_id):
+    item = Item.objects.get(pk=item_id)
+    return render(request, 'buyConfirm.html', {'item': item})
+
+def Paymentfailed(request,item_id):
+    item = Item.objects.get(pk=item_id)
+    return render(request, 'buyDenied.html', {'item': item})
 @login_required
+@allowed_users(allowed_roles=['president', 'treasurer'])
 def manageMarketplace_view(request):
     selected_tag_ids = request.GET.getlist('tags')
     min_price = request.GET.get('min_price')
@@ -510,6 +611,12 @@ def manageMarketplace_view(request):
 
     alltags = Tag.objects.all()
     
+    if request.method == 'POST':
+        newEmail=request.POST.get('addE')
+        if newEmail != "":
+        # orgs = Organization.objects.filter(name__icontains=inp)
+            thisOrg.bank_email=newEmail
+            thisOrg.save()
 
     context = {
         'thisOrg': thisOrg,

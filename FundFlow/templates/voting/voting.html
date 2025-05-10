@@ -1,28 +1,59 @@
 {% extends 'base.html' %}
-
 {% block content %}
 <div class="voting-row">
     <div class="col-lg-8 col-lg-offset-2">
         <div class="panel voting-panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">Active Polls</h3>
-                <span class="createPoll">
-                    <a href="{% url 'createPoll' %}" class="createPoll-btn btn-info btn-xs">Create New Poll</a> &nbsp;
-                </span>
+                <p class="paragraph">
+                    <i>What are polls?</i> <br>
+                    Polls are meant to make officer's decisions align with the needs and desires of members. Only officers 
+                    are able to create polls.
+                    <br>Polls are active for limited time, make sure your vote is accounted for!
+                </p>
             </div>
-                
-            <ul class="poll-list-group">
-                {% for poll in polls %}
-                <li class="poll-list-item">
-                    <strong class="poll-question">{{ poll.question }}</strong>
-                    <span class="pull-right">
-                        <a href="{% url 'voteForPoll' poll.id %}" class="vote-btn btn-info btn-xs">Vote</a> &nbsp;
-                        <a href="{% url 'resultsPoll' poll.id %}" class="results-btn btn-default btn-xs">View Results</a> &nbsp;
-                    </span>
-                </li>
+            {% if polls_by_org %}
+                {% for org, polls in polls_by_org.items %}
+                <div class="org-polls-container">
+                    <div class="org-header">
+                        <div class="org-title-container">
+                            <h4 class="org-name">{{ org.name }}</h4>
+                            {% if user_type == "president" or user_type == "treasurer" %}
+                                {% if user.userprofile.current_Org == org %}
+                                <span class="createPoll-container">
+                                    <a href="{% url 'createPoll' %}" class="createPoll-btn btn-info btn-xs">Create New Poll</a>
+                                </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <ul class="poll-list-group">
+                        {% for poll in polls %}
+                        <li class="poll-list-item">
+                            <strong class="poll-question">{{ poll.question }}</strong>
+                            <p>Expires: {{ poll.expiration_date }}</p>
+                            <span class="pull-right">
+                                <a href="{% url 'voteForPoll' poll.id %}" class="vote-btn btn-info btn-xs">Vote</a> &nbsp;
+                                <a href="{% url 'resultsPoll' poll.id %}" class="results-btn btn-default btn-xs">View Results</a> &nbsp;
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 {% endfor %}
-            </ul>
-
+            {% else %}
+                <div class="no-polls">
+                    <p>There are no active polls for your organizations at this time.</p>
+                    
+                    {% if user_type == "president" or user_type == "treasurer" %}
+                    <div class="create-first-poll">
+                        <p>As an officer, you can create the first poll for your organization.<br></p>
+                        <a href="{% url 'createPoll' %}" class="createPoll-btn btn-info">Create New Poll</a>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>

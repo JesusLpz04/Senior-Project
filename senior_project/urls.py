@@ -27,4 +27,5 @@ urlpatterns = [
     # path("fundflow/", home, name="FundFlow"),  # Ensure this is correctly set
     path('', include('FundFlow.urls')),
     path("admin/", admin.site.urls),
+    path('', include('paypal.standard.ipn.urls')),
 ]
