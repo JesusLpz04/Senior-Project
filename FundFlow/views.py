@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_http_methods
 from .forms import CreatePollForm, CreateTicketForm, SignUpForm, FundingRequestForm, CreateItemForm
-from .models import Poll, CreateTicket, UserProfile, Organization, Item, FundingRequest, TicketManager #, CartItem
+from .models import Poll, CreateTicket, UserProfile, Organization, Item, FundingRequest, Tag, TicketManager #, CartItem
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group, User
@@ -278,6 +278,8 @@ def voting_view(request):
         print(f"Error: {str(e)}")
         user_type = None
         polls_by_org = {}
+        
+    print("Polls by org:", polls_by_org)
     
     context = {
         'polls_by_org': dict(polls_by_org),
@@ -572,15 +574,46 @@ def PaymentSuccessful(request,item_id):
 def Paymentfailed(request,item_id):
     item = Item.objects.get(pk=item_id)
     return render(request, 'buyDenied.html', {'item': item})
+
 @login_required
 @allowed_users(allowed_roles=['president', 'treasurer'])
 def manageMarketplace_view(request):
+    selected_tag_ids = request.GET.getlist('tags')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
     thisOrg = curProf.current_Org
 
+    #for item cards
     items = Item.objects.filter(organization=thisOrg)
+    
+    #for search through items
+    search_query = request.GET.get('search')
+    if search_query:
+        items = items.filter(item_name__icontains=search_query)  # adjust "name" to your item model's search-relevant field
+
+
+    #for filter
+    if selected_tag_ids:
+        items = items.filter(tags__id__in=selected_tag_ids).distinct()
+    if min_price:
+        items = items.filter(price__gte=min_price)
+    if max_price:
+        items = items.filter(price__lte=max_price)
+        
+    #for sort by
+    sort_option = request.GET.get('sort')
+    if sort_option == 'price_asc':
+        items = items.order_by('price')
+    elif sort_option == 'price_desc':
+        items = items.order_by('-price')
+
+
+    alltags = Tag.objects.all()
+    
     if request.method == 'POST':
         newEmail=request.POST.get('addE')
         if newEmail != "":
@@ -592,9 +625,18 @@ def manageMarketplace_view(request):
         'thisOrg': thisOrg,
         'user_type': user_type,
         'items': items,
+        'alltags': alltags,
+        'selected_tag_ids': list(map(int, selected_tag_ids)),  
+        'selected_tags_raw': selected_tag_ids,
+        'min_price': min_price,
+        'max_price': max_price, 
+        'search_query': search_query, 
+        'sort_option': sort_option
     }
 
     return render(request, 'manageMarketplace.html', context)
+
+
 
 
 
