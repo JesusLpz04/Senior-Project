@@ -21,6 +21,29 @@
     width: 20%;
 }
 
+.add-change-container{
+    margin-top: 5%;
+}
+
+.addEmail-form {
+    display: flex;
+    align-items: center; /* vertically align button with input */
+    gap: 10px; /* optional spacing between input and button */
+}
+
+.addEmail-form input[type="email-text"] {
+    flex: 1; /* optional: allow input to expand */
+    padding: 8px;
+}
+
+.addEmail-form button {
+    padding: 8px 12px;
+    background-color: #053C5E;
+    color: white;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
 .create-item-btn-text{
     border-radius: 12px;
     background-color: #053C5E; 
@@ -84,7 +107,9 @@
     margin-left:8px;
     position: relative;
     vertical-align: middle;
+    z-index: 1;
 }
+
 
 .custom-checkbox input[type="checkbox"]:checked + .checkmark::after {
     content: '';
@@ -260,7 +285,6 @@
     width: 35%;
     border-color: #D9D9D9;
     border-radius: 10px;
-    margin-top: 15px;
     margin-bottom:10px;
     font-size: 17px;
     gap: 5px;
@@ -349,8 +373,7 @@
   }
   
 .item-price,
-.item-quantity,
-.edit-item {
+.item-quantity{
     flex: 1;
 }
 
@@ -359,13 +382,9 @@
 }
 
 .item-quantity {
-    text-align: left;
+    text-align: right;
     padding-left: 10px;
     color: grey;
-}
-
-.edit-item {
-    text-align: right;
 }
 
 

@@ -5,22 +5,25 @@
 
 <div class = "manage-org-title"> Manage {{thisOrg}} Marketplace</div>
 
-<div> 
-    Current Email: {{thisOrg.bank_email}}
-    <div class="container"> 
-        Add or change Paypay Business Email:
-        <form method="POST" class="addEmail-form">
-            {% csrf_token %}
-            <input type="hidden" name="addEmail" value="email">
-            <input type="text" id="text-label" name="addE" placeholder="Add Email">
-            <button class="explore" name="addEmailBtn"  >Add/change</button>
-        </form>
-    </div>
-</div>
 
 <div class = "manage-org-contents">
 
     <div class = "manage-item-info-container">
+
+        <div class = "email-container"> 
+            Current Email: {{thisOrg.bank_email}}
+            <div class="add-change-container"> 
+                Add or change Paypay Business Email:
+            </div>
+
+            <form method="POST" class="addEmail-form">
+                {% csrf_token %}
+                <input type="hidden" name="addEmail" value="email">
+                <input type="email-text" id="text-label" name="addE" placeholder="Add Email">
+                <button class="explore" name="addEmailBtn">Add/change</button>
+            </form>
+        </div>
+        
         <a id="create-item-btn" href="{% url 'createitem' %}">
             <button class="create-item-btn-text" > + Create New Item </button>
         </a> 
@@ -129,7 +132,6 @@
                     <div class="item-details-row">
                         <div class="item-price">${{ item.price }}</div>
                         <div class="item-quantity">{{ item.quantity }} left</div>
-                        <div class="edit-item"><i class="fa fa-edit" style="font-size:18px"></i></div>
                     </div>
         
                     <div class="item-tags">
