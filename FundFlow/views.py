@@ -17,6 +17,7 @@ import uuid
 from django.urls import reverse
 from django.utils import timezone
 from .decorators import unauthorized_user, allowed_users
+from collections import defaultdict
 from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
@@ -259,9 +260,6 @@ def createticket_view(request):
 
 @login_required
 def voting_view(request):
-
-    from django.utils import timezone
-    from collections import defaultdict
     
     current_time = timezone.now()
     current_user = request.user
@@ -533,6 +531,10 @@ def joinOrg_view(request,org_id):
 
 @login_required
 def marketplace_view(request):
+    selected_tag_ids = request.GET.getlist('tags')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+    
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
@@ -540,15 +542,55 @@ def marketplace_view(request):
     
     items = Item.objects.all()
 
+    #for search through items
+    search_query = request.GET.get('search')
+    if search_query:
+        items = items.filter(item_name__icontains=search_query)  # adjust "name" to your item model's search-relevant field
+
     if request.method == 'POST':
         item_id = request.POST.get('item_id')
         print(item_id)
         item=Item.objects.get(pk=item_id)
         return redirect('checkout', item.id)
 
+    #for filter
+    if selected_tag_ids:
+        items = items.filter(tags__id__in=selected_tag_ids).distinct()
+    if min_price:
+        items = items.filter(price__gte=min_price)
+    if max_price:
+        items = items.filter(price__lte=max_price)
+        
+    #for sort by
+    sort_option = request.GET.get('sort')
+    if sort_option == 'price_asc':
+        items = items.order_by('price')
+    elif sort_option == 'price_desc':
+        items = items.order_by('-price')
+
+
+    alltags = Tag.objects.all()
+    
+    temp_grouped = defaultdict(list)
+    for item in items:
+        temp_grouped[item.organization.name].append(item)
+
+    grouped_items = dict(temp_grouped)
+
+
+    
     context = {
+        'thisOrg': thisOrg,
         'user_type': user_type,
         'items': items,
+        'grouped_items': grouped_items,
+        'alltags': alltags,
+        'selected_tag_ids': list(map(int, selected_tag_ids)),  
+        'selected_tags_raw': selected_tag_ids,
+        'min_price': min_price,
+        'max_price': max_price, 
+        'search_query': search_query, 
+        'sort_option': sort_option
     }
     return render(request, 'marketplace.html', context)
 
