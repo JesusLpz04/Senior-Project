@@ -48,7 +48,7 @@
                     
                     {% if user_type == "president" or user_type == "treasurer" %}
                     <div class="create-first-poll">
-                        <p>As an officer, you can create the first poll for your organization.<br></p>
+                        <p class="no-poll-text">As an officer, you can create the first poll for your organization.<br></p>
                         <a href="{% url 'createPoll' %}" class="createPoll-btn btn-info">Create New Poll</a>
                     </div>
                     {% endif %}

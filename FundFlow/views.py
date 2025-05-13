@@ -427,11 +427,10 @@ def manageOrg_view(request):
 
 @login_required
 def fundingRequests_view(request):
-
     current_user = request.user
 
     try:
-        #Get the user type of the loged in user
+        # Get the user type of the logged in user
         curProf = UserProfile.objects.get(user=current_user)
         user_type = curProf.user_type
 
@@ -443,7 +442,7 @@ def fundingRequests_view(request):
 
         for org in user_orgs:
             org_requests = FundingRequest.objects.filter(
-                organization = org
+                organization=org
             ).order_by('created_at')
 
             if org_requests.exists():
@@ -461,8 +460,9 @@ def fundingRequests_view(request):
                     funding_request.status = new_status
                     funding_request.save()
                     
+                    
                     # Redirect to prevent form resubmission
-                    return render(request, 'fundingRequests')
+                    return redirect('fundingRequests')
         
     except Exception as e:
         print(f"Error: {str(e)}")
@@ -473,18 +473,19 @@ def fundingRequests_view(request):
     context = {
         'funding_requests_by_org': dict(funding_requests_by_org),
         'user_type': user_type,
-        'user_orgs' : user_orgs,
+        'user_orgs': user_orgs,
     }
 
     template = loader.get_template('fundingRequests.html')
     return HttpResponse(template.render(context, request))
 
-# This AJAX view is simplified but still available if you want to use it
 @login_required
 @require_http_methods(["POST"])
 def create_funding_request(request):
-    # Explicit check for AJAX request
-    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+    # Check for AJAX request
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+    
+    if not is_ajax:
         return JsonResponse({
             'error': 'Only AJAX requests are supported'
         }, status=400)
@@ -497,13 +498,17 @@ def create_funding_request(request):
             funding_request.created_by = request.user
             funding_request.save()
             
+            # Return complete data including status display name
             return JsonResponse({
                 'id': funding_request.id,
                 'subject': funding_request.subject,
                 'organization': funding_request.organization.name,
                 'status': funding_request.status,
                 'status_display': funding_request.get_status_display(),
-                'created_at': funding_request.created_at.strftime('%Y-%m-%d %H:%M')
+                'created_at': funding_request.created_at.strftime('%Y-%m-%d %H:%M'),
+                'amount': str(funding_request.amount),
+                'description': funding_request.description,
+                'link': funding_request.link or ''
             })
         else:
             # Return form errors as JSON

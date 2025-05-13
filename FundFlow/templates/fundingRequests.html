@@ -2,6 +2,18 @@
 
 {% block content %}
 
+<<<<<<< HEAD
+<!-- Add user type as a data attribute to the body -->
+{% if user_type %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.dataset.userType = "{{ user_type }}";
+    });
+</script>
+{% endif %}
+
+=======
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
 <div class="funding-row">
     <div class="col-lg-8 col-lg-offset-2">
         <div class="panel funding-panel-default">
@@ -267,12 +279,23 @@
                     const amount = formData.get('amount');
                     const link = formData.get('link');
                     
+<<<<<<< HEAD
+                    // Check if current user is a president or treasurer
+                    const userType = document.body.dataset.userType || '';
+                    const isAdmin = userType === 'president' || userType === 'treasurer';
+                    
+=======
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
                     // Generate the HTML for the new request item with hidden description
                     listItem.innerHTML = `
                         <div class="request-header" onclick="toggleDescription(this)">
                             <strong class="request-subject">${subject}</strong>
                             <p class="request-details">
+<<<<<<< HEAD
+                                Amount: $${amount || '0.00'} | 
+=======
                                 Amount: ${amount || '0.00'} | 
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
                                 Submitted on: ${formattedDate}
                                 ${link ? `| <a href="${link}" target="_blank" onclick="event.stopPropagation()">View Link</a>` : ''}
                             </p>
@@ -285,6 +308,25 @@
                             <span class="status-badge status-${data.status || 'submitted'}">
                                 ${data.status_display || 'Submitted'}
                             </span>
+<<<<<<< HEAD
+                            
+                            ${isAdmin ? `
+                            <div class="status-controls">
+                                <form method="post" class="status-update-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="request_id" value="${data.id}">
+                                    <select name="status" class="status-select">
+                                        <option value="submitted" selected>Submitted</option>
+                                        <option value="review">Under Review</option>
+                                        <option value="approved">Approved</option>
+                                        <option value="denied">Denied</option>
+                                    </select>
+                                    <button type="submit" class="update-status-btn btn-xs btn-primary">Update</button>
+                                </form>
+                            </div>
+                            ` : ''}
+=======
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
                         </div>
                     `;
                     
