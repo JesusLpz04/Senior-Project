@@ -3,14 +3,48 @@
 
 
 {% block content %}
-    <head>
-    </head>
 
 
-    <div class="reg-container">
+<div class="purchase-container"> 
+    <div class="purchase-card">
+       <h1>Confirmed Purchase</h1> 
+        <div class="purchase-image">
+            {% if item.image %}
+                <a href="#" class="image-link" data-image="{{ item.image.url }}">
+                    <img src="{{ item.image.url }}" alt="{{ item.item_name }}">
+                </a>
+            {% else %}
+                <img src="{% static 'images/no_image.PNG' %}" alt="Default image">
+            {% endif %}
+            
+        </div>
 
-        <main>
-            <div>Your transaction was a success!</div>
-        </main>
+
+        <div class="purchase-name-row">
+            {{ item.item_name }}
+        </div>
+
+        <div class="purchase-details-row">
+            <div class="purchase-price">${{ item.price }}</div>
+            <div class="purchase-quantity"> Only {{ item.quantity }} left!</div>
+        </div>
+
+        <div class="purchase-tags">
+            Tags: 
+            {% for tag in item.tags.all %}
+                {{ tag.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                No tags
+            {% endfor %}
+        </div>
+
+        <div class="purchase-bottom-container">
+        
+            <div class="back-btn">
+                <a href="{% url 'marketplace' %}" class="back-btn-text">Back to shopping</a>
+            </div>
+        </div>        
     </div>
+</div>
+    
 {% endblock %}

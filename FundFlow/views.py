@@ -207,7 +207,8 @@ def dashboard_view(request):
         'orgs':orgs,
         'belongsOrgs':belongsOrgs,
         'user_type':user_type,
-        'pendsOrgs':pendsOrgs
+        'pendsOrgs':pendsOrgs,
+        'curProf':curProf
     }
     return render(request, 'dashboard.html', context)
 
@@ -221,6 +222,8 @@ def expenses_view(request):
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
     curOrg= curProf.current_Org
+    if curOrg == None:
+         return render(request, 'noAccess.html')
     tic=curOrg.tickets.all()
     print(tic)
     for ticket in tic:
@@ -235,7 +238,7 @@ def expenses_view(request):
 
     return render(request, 'expenses.html', {
     'tickets_with_balance': list(reversed(ticket_data)),  
-    'balance': running_balance, 'user_type':user_type  
+    'balance': running_balance, 'user_type':user_type, "curProf":curProf  
     })
     
 @login_required
@@ -638,12 +641,31 @@ def PaymentSuccessful(request,item_id):
     # Send the email
     send_mail(subject, message, "utrgvmarketplace@gmail.com", [recipient], fail_silently=False)
 
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    thisOrg = item.organization
 
-    return render(request, 'buyConfirm.html', {'item': item})
+    new_ticket=CreateTicket.objects.create(
+    amount=item.price,
+    date= timezone.now(),
+    operation="add",
+    expense_category="other",
+    description=f"{item.item_name} was sold"
+    
+    )
+    thisOrg.tickets.add(new_ticket)
+    item.quantity -= 1
+    item.save()
+
+    return render(request, 'buyConfirm.html', {'item': item, 'user_type':user_type})
 
 def Paymentfailed(request,item_id):
     item = Item.objects.get(pk=item_id)
-    return render(request, 'buyDenied.html', {'item': item})
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    return render(request, 'buyDenied.html', {'item': item, 'user_type':user_type})
 
 @login_required
 @allowed_users(allowed_roles=['president', 'treasurer'])

@@ -40,7 +40,9 @@
 
         <div class="purchase-bottom-container">
             <div class="paypal-container">
+                {% if itm.quantity > 0 %}
                 {{ paypal.render }}
+                {% endif %}
             </div>
         
             <div class="back-btn">
