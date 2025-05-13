@@ -1,12 +1,20 @@
-{% extends 'base.html' %}  
+{% extends 'base.html' %}
 
 {% block content %}
-  <h2>Delete Item</h2>
-  <p>Are you sure you want to delete <strong>{{ item.item_name }}</strong>? This action cannot be undone.</p>
+  <div class="delete-container">
+    
+    <h2 class="delete-title">Delete Item</h2>
+    
+    <p class="delete-warning">
+      Are you sure you want to delete <strong>{{ item.item_name }}</strong>?<br>
+      This action cannot be undone.
+    </p>
 
-  <form method="post">
-    {% csrf_token %}
-    <button type="submit">Yes, delete</button>
-    <a href="{% url 'manageMarketplace' %}">Cancel</a>
-  </form>
+    <form method="post" class="delete-form">
+      {% csrf_token %}
+      <button type="submit" class="delete-btn">Yes, delete</button>
+      <a href="{% url 'manageMarketplace' %}" class="cancel-link">Cancel</a>
+    </form>
+
+  </div>
 {% endblock %}
