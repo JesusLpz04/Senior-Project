@@ -2,25 +2,33 @@
 
 {% block content %}
 
+
 <div class = "tickets-info-container">
     <div class="tickets-text-container">
         <label id="tickets-subtitle-label">
             Tickets
         </label>
         <label id="tickets-text-label">
-            Tickets should be created to log previously approved and completed
+            Tickets log previously approved and completed
             use of the organizations funds. 
         </label>
+
+        {% if user.is_authenticated %}
+        {% if user_type == "president" or user_type == "treasurer" %}
         <a id="create-ticket-btn-label" href="{% url 'createticket' %}">
             <button class="create-ticket-btn" >+ create ticket</button>
         </a> 
+        {% endif %}
+        {% endif %}
+
     </div>
 </div>
+
 
 <div class = "tickets-info-container">
     <div class="tickets-text-container">
         <label id="tickets-subtitle-label">
-            Log History
+            Log History for {{curProf.current_Org}}
         </label>
     </div>
     <div class = "log-info-container">

@@ -3,17 +3,53 @@
 
 
 {% block content %}
-    <head>
-    </head>
 
 
-    <div class="reg-container">
+<div class="purchase-container"> 
+    <div class="purchase-card">
+
+        <div class="purchase-image">
+            {% if itm.image %}
+                <a href="#" class="image-link" data-image="{{ itm.image.url }}">
+                    <img src="{{ itm.image.url }}" alt="{{ itm.item_name }}">
+                </a>
+            {% else %}
+                <img src="{% static 'images/no_image.PNG' %}" alt="Default image">
+            {% endif %}
+            
+        </div>
 
 
-        <main>
-            <div>{{ itm.item_name}}</div>
-            <div>{{ itm.price}}</div>
-            {{ paypal.render }}
-        </main>
+        <div class="purchase-name-row">
+            {{ itm.item_name }}
+        </div>
+
+        <div class="purchase-details-row">
+            <div class="purchase-price">${{ itm.price }}</div>
+            <div class="purchase-quantity"> Only {{ itm.quantity }} left!</div>
+        </div>
+
+        <div class="purchase-tags">
+            Tags: 
+            {% for tag in itm.tags.all %}
+                {{ tag.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                No tags
+            {% endfor %}
+        </div>
+
+        <div class="purchase-bottom-container">
+            <div class="paypal-container">
+                {% if itm.quantity > 0 %}
+                {{ paypal.render }}
+                {% endif %}
+            </div>
+        
+            <div class="back-btn">
+                <a href="{% url 'marketplace' %}" class="back-btn-text">Back to shopping</a>
+            </div>
+        </div>        
     </div>
+</div>
+    
 {% endblock %}

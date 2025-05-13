@@ -66,6 +66,7 @@ body {
     overflow-x: hidden;
     transition: 0.3s;
     padding-top: 60px;
+    z-index: 1000;
 }
 
 .side-menu a {
