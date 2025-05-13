@@ -2,6 +2,7 @@
 
 {% block content %}
 
+<<<<<<< HEAD
 <!-- Add user type as a data attribute to the body -->
 {% if user_type %}
 <script>
@@ -11,6 +12,8 @@
 </script>
 {% endif %}
 
+=======
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
 <div class="funding-row">
     <div class="col-lg-8 col-lg-offset-2">
         <div class="panel funding-panel-default">
@@ -276,16 +279,23 @@
                     const amount = formData.get('amount');
                     const link = formData.get('link');
                     
+<<<<<<< HEAD
                     // Check if current user is a president or treasurer
                     const userType = document.body.dataset.userType || '';
                     const isAdmin = userType === 'president' || userType === 'treasurer';
                     
+=======
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
                     // Generate the HTML for the new request item with hidden description
                     listItem.innerHTML = `
                         <div class="request-header" onclick="toggleDescription(this)">
                             <strong class="request-subject">${subject}</strong>
                             <p class="request-details">
+<<<<<<< HEAD
                                 Amount: $${amount || '0.00'} | 
+=======
+                                Amount: ${amount || '0.00'} | 
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
                                 Submitted on: ${formattedDate}
                                 ${link ? `| <a href="${link}" target="_blank" onclick="event.stopPropagation()">View Link</a>` : ''}
                             </p>
@@ -298,6 +308,7 @@
                             <span class="status-badge status-${data.status || 'submitted'}">
                                 ${data.status_display || 'Submitted'}
                             </span>
+<<<<<<< HEAD
                             
                             ${isAdmin ? `
                             <div class="status-controls">
@@ -314,6 +325,8 @@
                                 </form>
                             </div>
                             ` : ''}
+=======
+>>>>>>> 782c4422cc563b5ffbdc63200580f780f1ccc17b
                         </div>
                     `;
                     
