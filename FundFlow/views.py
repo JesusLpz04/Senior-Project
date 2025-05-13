@@ -17,6 +17,7 @@ import uuid
 from django.urls import reverse
 from django.utils import timezone
 from .decorators import unauthorized_user, allowed_users
+from django.core.mail import send_mail
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +79,9 @@ def signup_view(request):
             
             if User.objects.filter(email=email).exists():
                 messages.error(request, 'A user with this email already exists.')  
+                return render(request, 'signUp.html', {'form': form})
+            if not email.endswith('@utrgv.edu'):
+                messages.error(request,"Only @utrgv.edu email addresses are allowed.")
                 return render(request, 'signUp.html', {'form': form})
 
             
@@ -569,6 +573,21 @@ def checkout_view(request,item_id):
 
 def PaymentSuccessful(request,item_id):
     item = Item.objects.get(pk=item_id)
+
+    subject = f"Purchase Confirmation: {item.item_name}"
+    message = (
+        f"Hello {request.user.first_name},\n\n"
+        f"Thank you for purchasing '{item.item_name}'.\n"
+        f"Price: ${item.price:.2f}\n"
+        f"We hope you enjoy your item!\n\n"
+        f"- The Marketplace Team"
+    )
+    recipient = request.user.email
+
+    # Send the email
+    send_mail(subject, message, "utrgvmarketplace@gmail.com", [recipient], fail_silently=False)
+
+
     return render(request, 'buyConfirm.html', {'item': item})
 
 def Paymentfailed(request,item_id):
