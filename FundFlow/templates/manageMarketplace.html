@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% block content %}
 
 
@@ -116,7 +117,7 @@
                                 <img src="{{ item.image.url }}" alt="{{ item.item_name }}">
                             </a>
                         {% else %}
-                            <div class="image-placeholder"> ------------ No image ------------</div>
+                            <img src="{% static 'images/no_image.PNG' %}" alt="Default image">
                         {% endif %}
                     </div>
         
