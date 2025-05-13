@@ -1,0 +1,132 @@
+.purchase-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh; 
+    padding: 20px;
+}
+
+.purchase-card {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 18px;
+    width: 40%;
+    max-width: 500px;
+}
+
+.purchase-image {
+    width: 100%;
+    display: block;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.purchase-image img {
+    width: 100%;
+    height: auto;
+    max-height: 325px; 
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+
+.purchase-placeholder {
+    width: 100%;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+.purchase-name-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-weight: bold;
+    font-size: 24px; 
+    margin-bottom: 5px;
+}
+
+.purchase-details-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+  
+.purchase-price,
+.purchase-quantity{
+    flex: 1;
+}
+
+.purchase-price {
+    text-align: left;
+}
+
+.purchase-quantity {
+    text-align: right;
+    padding-left: 10px;
+    color: red;
+}
+
+
+.purchase-tags {
+    width: 100%;
+    font-size: 18px;
+    color: grey;
+    text-align: left;
+}
+.purchase-bottom-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    margin-top: 20px;
+}
+
+.paypal-container {
+    background-color: #0070ba; 
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    width: 40%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.paypal-container:hover {
+    background-color: #074f80;
+}
+
+.back-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.back-btn-text {
+    font-size: 12px;
+    padding-right: 10px;
+    margin: 0;
+    background: none;
+    border: none;
+    color: #074f80;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.back-btn-text:hover {
+    color: #0070ba;
+    text-decoration: underline;
+}

@@ -1,102 +1,194 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
-<h1>Marketplace</h1>
+<div class="manage-org-title"> Explore Marketplace – All Organizations</div>
 
+<div class = "manage-org-contents">
 
-<div>
-    <table class= "log-table">
-        <thead>
-            <tr>
-                <th>Item Name</th>
-                <th>Price</th>
-                <th>Tags</th>
-                <th>Quantity</th>
-                <th>Image</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in items %}
-            <tr>
-                <td>{{ item.item_name  }}</td>
-                <td>{{ item.price }}</td>
-                <td>
-                    {% for tag in item.tags.all %}
-                      {{ tag.name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                      No tags
-                    {% endfor %}
-                </td>
-                <td>{{ item.quantity }}</td>
-                <td>
-                    {% if item.image %}
-                        <a href="#" class="image-link" data-image="{{ item.image.url }}">View image</a>
-                    {% else %}
-                        No image provided 
-                    {% endif %}
-                    <form method="POST" class="view">
-                        {% csrf_token %}
-                        <input type="hidden" name="viewItem" value="item">
+    <div class = "manage-item-info-container">
+
+        <div class ="manage-item-filter-container"> 
+
+            <div class ="manage-filter-subtitle"> Keywords </div>
+
+            <form method="get" class="filter-form">
+                <div class="tag-container">
+                    {% for tag in alltags %}
+                    <div class="tag-box">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="tags" value="{{ tag.id }}"
+                                {% if tag.id in selected_tag_ids %}checked{% endif %}>
+                            {{ tag.name }}
+                            <span class="checkmark"></span>
+                        </label>
                     </div>
-                    <button class="explore" name="item_id" value="{{item.id}}" >view</button>
+                    {% endfor %}
                 </div>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-</div>
-<!-- item image modal -->
-<div id="itemModal" class="item">
-    <div class="item-content">
-        <span class="close">&times;</span>
-        <div id="itemContainer">
-            <!-- Receipt will be displayed here -->
+            
+                <div class="price-slider-container">
+                    <label class="price-slider-label">Price Range</label>
+                    <div class="price-inputs">
+                        <div class="price-input-group">
+                            <span>$</span>
+                            <input type="number" name="min_price" id="min-input" value="{{ request.GET.min_price|default:0 }}">
+                        </div>
+                        <div class="price-input-group">
+                            <span>$</span>
+                            <input type="number" name="max_price" id="max-input" value="{{ request.GET.max_price|default:300 }}">
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="sort-options">
+                    <div class="sort-label">Sort by:</div>
+                
+                    <label class="radio-option">
+                        <input type="radio" name="sort" value="" {% if not request.GET.sort %}checked{% endif %}>
+                        <span class="radio-circle"></span>
+                        <span class="radio-label">None</span>
+                    </label>
+                
+                    <label class="radio-option">
+                        <input type="radio" name="sort" value="price_asc" {% if request.GET.sort == 'price_asc' %}checked{% endif %}>
+                        <span class="radio-circle"></span>
+                        <span class="radio-label">Price: low to high</span>
+                    </label>
+                
+                    <label class="radio-option">
+                        <input type="radio" name="sort" value="price_desc" {% if request.GET.sort == 'price_desc' %}checked{% endif %}>
+                        <span class="radio-circle"></span>
+                        <span class="radio-label">Price: high to low</span>
+                    </label>
+                </div>
+                
+                                    
+                <button type="submit" class="filter-item-btn-text">Filter</button>
+            </form>
+            
+            <div style="margin-top: 10px;">
+                <a href="{% url 'marketplace' %}">
+                    <button type="button" class="clear-filter-item-btn-text" >Clear Filters</button>
+                </a>
+            </div>
+            
         </div>
     </div>
+
+
+
+    <div class="item-cards-container">
+        
+        <form class="search-all-items" method="get" action="">
+            <input type="text" name="search" placeholder="Search items...">
+            <button type="submit">
+                <i class="fa fa-search" style="font-size:20px"></i>
+            </button>
+        </form>
+    
+            
+            {% for org_name, org_items in grouped_items.items %}
+                
+                <div class = "org-name">{{ org_name }}</div>  
+                    
+                <div class="item-grid"> 
+                    {%if org_items%}
+                        {% for item in org_items %}
+                        <div class="item-card">
+                            <div class="item-image">
+                                {% if item.image %}
+                                    <a href="#" class="image-link" data-image="{{ item.image.url }}">
+                                        <img src="{{ item.image.url }}" alt="{{ item.item_name }}">
+                                    </a>
+                                {% else %}
+                                    <img src="{% static 'images/no_image.PNG' %}" alt="Default image">
+                                {% endif %}
+                            </div>
+                
+                
+                            <div class="item-name-row">
+                                <div class="item-name-text">{{ item.item_name }}</div>
+
+                            </div>
+
+                            <div class="item-details-row">
+                                <div class="item-price">${{ item.price }}</div>
+                                <div class="item-quantity">{{ item.quantity }} left</div>
+                            </div>
+                
+                            <div class = "bottom-details-row">
+                                <div class="item-tags">
+                                    Tags: 
+                                    {% for tag in item.tags.all %}
+                                        {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                        No tags
+                                    {% endfor %}
+                                </div>
+
+                                <form method="POST" class="view">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="viewItem" value="item">
+                                    <button class="buy-button" name="item_id" value="{{item.id}}" >Buy Now</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% elif search_query %}
+                        <div class = "no-items"> No results, try a different search. </div>
+                    {%else%}
+                        <div class = "no-items"> No items for this org, just dont let them show </div>
+                    {%endif%}
+                </div>
+            {% endfor %}
+    </div>
+
 </div>
 
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var modal = document.getElementById('itemModal');
-        var container = document.getElementById('itemContainer');
-        var span = document.getElementsByClassName('close')[0];
-        var itemLinks = document.getElementsByClassName('image-link');
-        
-        // When the user clicks on a item link, open the modal
-        for (var i = 0; i < itemLinks.length; i++) {
-            itemLinks[i].addEventListener('click', function(event) {
-                event.preventDefault();
-                var itemUrl = this.getAttribute('data-image');
-                
-                // Check file type to determine how to display it
-                if (itemUrl.toLowerCase().endsWith('.pdf')) {
-                    container.innerHTML = '<iframe src="' + itemtUrl + '" width="100%" height="500px"></iframe>';
-                } else {
-                    container.innerHTML = '<img src="' + itemUrl + '" style="max-width:100%; max-height:80vh;">';
-                }
-                
-                modal.style.display = 'block';
-            });
+
+    const minRange = document.getElementById('min-range');
+    const maxRange = document.getElementById('max-range');
+    const minInput = document.getElementById('min-input');
+    const maxInput = document.getElementById('max-input');
+    const minGap = 500;
+    
+    function updateSlider() {
+        const min = parseInt(minRange.value);
+        const max = parseInt(maxRange.value);
+        if (max - min <= minGap) {
+        if (event.target === minRange) {
+            minRange.value = max - minGap;
+        } else {
+            maxRange.value = min + minGap;
         }
-        
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-            modal.style.display = 'none';
         }
-        
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
+        minInput.value = minRange.value;
+        maxInput.value = maxRange.value;
+    }
+    
+    function updateInput() {
+        let min = parseInt(minInput.value);
+        let max = parseInt(maxInput.value);
+        if (max - min >= minGap && min >= parseInt(minRange.min) && max <= parseInt(maxRange.max)) {
+        minRange.value = min;
+        maxRange.value = max;
         }
-    });
+    }
+    
+    minRange.addEventListener('input', updateSlider);
+    maxRange.addEventListener('input', updateSlider);
+    minInput.addEventListener('change', updateInput);
+    maxInput.addEventListener('change', updateInput);
 </script>
 
 {%endblock%}
+
+
+
+
+
+
 

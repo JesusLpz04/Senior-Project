@@ -41,6 +41,7 @@ class Organization(models.Model):
     members = models.ManyToManyField(User, related_name='organizations', blank=True)
     pending_members = models.ManyToManyField(User, related_name='pending_organizations', blank=True)
     bank_email= models.EmailField(verbose_name='Email Address', unique=False, blank=True, null=True)
+    tickets=models.ManyToManyField('CreateTicket', related_name='tickets', blank=True)
     
         
     def request_membership(self, user):
