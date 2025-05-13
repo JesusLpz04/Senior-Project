@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="funding-row">
     <div class="col-lg-8 col-lg-offset-2">
         <div class="panel funding-panel-default">
@@ -15,21 +16,63 @@
                     <a href="#" class="requestFunds-btn btn-info btn-xs" id="openRequestForm">Request Funds</a> &nbsp;
                 </span>
             </div>
-                
-            <ul class="requests-list-group" id="requestsList">
-                {% for request in funding_requests %}
-                <li class="requests-list-item">
-                    <strong class="request-subject">{{ request.subject }}</strong>
-                    <span class="pull-right status-badge status-{{ request.status }}">
-                        {{ request.get_status_display }}
-                    </span>
-                </li>
-                {% empty %}
-                <li class="requests-list-item empty-list">
-                    <em>No funding requests yet. Be the first to request!</em>
-                </li>
+            {% if funding_requests_by_org %}
+                {% for org, requests in funding_requests_by_org.items %}
+                <div class="org-requests-container">
+                    <div class="org-header">
+                        <div class="org-title-container">
+                            <h4 class="org-name">{{ org.name }}</h4>
+                        </div>
+                    </div>
+                    
+                    <ul class="requests-list-group">
+                        {% for request in requests %}
+                        <li class="requests-list-item" data-id="{{ request.id }}">
+                            <div class="request-header" onclick="toggleDescription(this)">
+                                <strong class="request-subject">{{ request.subject }}</strong>
+                                <p class="request-details">
+                                    Amount: ${{ request.amount }} | 
+                                    Submitted on: {{ request.created_at|date:"M d, Y" }}
+                                    {% if request.link %}
+                                    | <a href="{{ request.link }}" target="_blank" onclick="event.stopPropagation()">View Link</a>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            
+                            <!-- Hidden description (will be shown in popup) -->
+                            <div class="request-description" style="display: none;">{{ request.description }}</div>
+                            
+                            <div class="request-status-controls">
+                                <span class="status-badge status-{{ request.status }}">
+                                    {{ request.get_status_display }}
+                                </span>
+                                
+                                {% if user_type == "president" or user_type == "treasurer" %}
+                                <div class="status-controls">
+                                    <form method="post" class="status-update-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="request_id" value="{{ request.id }}">
+                                        <select name="status" class="status-select">
+                                            <option value="submitted" {% if request.status == 'submitted' %}selected{% endif %}>Submitted</option>
+                                            <option value="review" {% if request.status == 'review' %}selected{% endif %}>Under Review</option>
+                                            <option value="approved" {% if request.status == 'approved' %}selected{% endif %}>Approved</option>
+                                            <option value="denied" {% if request.status == 'denied' %}selected{% endif %}>Denied</option>
+                                        </select>
+                                        <button type="submit" class="update-status-btn btn-xs btn-primary">Update</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 {% endfor %}
-            </ul>
+            {% else %}
+                <div class="no-requests">
+                    <p>There are no funding requests for your organizations at this time.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -42,7 +85,16 @@
         <form id="fundingRequestForm" method="post" action="{% url 'create_funding_request' %}">
             {% csrf_token %}
             <div class="form-group">
-                <label for="subject"><br>Subject:</label>
+                <label for="organization">Organization:</label>
+                <select id="organization" name="organization" class="form-control" required>
+                    <option value="">Select an organization</option>
+                    {% for org in user_orgs %}
+                    <option value="{{ org.id }}">{{ org.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subject">Subject:</label>
                 <input type="text" id="subject" name="subject" class="form-control" required>
             </div>
             <div class="form-group">
@@ -62,7 +114,39 @@
     </div>
 </div>
 
+<!-- Description Popup Modal -->
+<div id="descriptionPopup" class="modal description-popup">
+    <div class="modal-content">
+        <span class="close" onclick="closeDescriptionPopup()">&times;</span>
+        <h3 id="popupTitle">Request Title</h3>
+        <div id="popupContent" class="popup-description">
+            Description will appear here
+        </div>
+    </div>
+</div>
+
 <script>
+    // Function to show description in popup
+    function toggleDescription(element) {
+        const listItem = element.closest('.requests-list-item');
+        const description = listItem.querySelector('.request-description').textContent;
+        const subject = listItem.querySelector('.request-subject').textContent;
+        
+        // Create and show popup
+        const popup = document.getElementById('descriptionPopup');
+        const popupTitle = document.getElementById('popupTitle');
+        const popupContent = document.getElementById('popupContent');
+        
+        popupTitle.textContent = subject;
+        popupContent.textContent = description;
+        popup.style.display = 'block';
+    }
+    
+    // Close popup when clicking the X or outside
+    function closeDescriptionPopup() {
+        document.getElementById('descriptionPopup').style.display = 'none';
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Modal elements
         const modal = document.getElementById('requestFormModal');
@@ -80,97 +164,224 @@
         closeBtn.addEventListener('click', function() {
             modal.style.display = 'none';
         });
-
-        // Close modal when clicking outside of it
+        
+        // Close description popup when clicking outside of it
         window.addEventListener('click', function(event) {
+            const descriptionPopup = document.getElementById('descriptionPopup');
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
+            if (event.target === descriptionPopup) {
+                descriptionPopup.style.display = 'none';
+            }
         });
 
-        // Handle form submission using AJAX
+        // Prevent automatic status update submission
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('status-select')) {
+                // Do nothing - we'll require the button click
+                e.stopPropagation();
+            }
+        });
+
         form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(form);
-    
-    fetch('{% url "create_funding_request" %}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Parsed data:', data);
+            e.preventDefault();
         
-        // Check for successful submission
-        if (data.id && data.status) {
-            const requestsList = document.getElementById('requestsList');
-            
-            // Remove empty state message if it exists
-            const emptyItem = requestsList.querySelector('.empty-list');
-            if (emptyItem) {
-                emptyItem.remove();
-            }
-            
-            // Create new list item
-            const listItem = document.createElement('li');
-            listItem.className = 'requests-list-item';
-            listItem.dataset.id = data.id;
-            
-            const subject = document.createElement('strong');
-            subject.className = 'request-subject';
-            subject.textContent = data.subject;
-            
-            const statusBadge = document.createElement('span');
-            statusBadge.className = `pull-right status-badge status-${data.status}`;
-            statusBadge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
-            
-            listItem.appendChild(subject);
-            listItem.appendChild(statusBadge);
-            
-            // Add to the beginning of the list
-            if (requestsList.firstChild) {
-                requestsList.insertBefore(listItem, requestsList.firstChild);
-            } else {
-                requestsList.appendChild(listItem);
-            }
-            
-            // Reset form and close modal
-            form.reset();
-            modal.style.display = 'none';
-        } else {
-            // Handle error cases
-            console.error('Form submission error:', data);
-            
-            let errorMessage = 'Error submitting request:\n';
-            
-            if (data.errors) {
-                // Handle form validation errors
-                Object.keys(data.errors).forEach(field => {
-                    errorMessage += `${field}: ${data.errors[field]}\n`;
-                });
-            } else if (data.error) {
-                // Handle server-side error messages
-                errorMessage = data.error;
-            } else {
-                errorMessage = 'An unknown error occurred';
-            }
-            
-            alert(errorMessage);
-        }
-    })
-    .catch(error => {
-        console.error('Submission Error:', error);
-        alert('An error occurred while submitting your request. Please check the console for details.');
-    });
-});
+            const formData = new FormData(form);
+        
+            fetch('{% url "create_funding_request" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Check for successful submission
+                if (data.status && data.subject) {
+                    // Get organization name from the select element instead of relying on response
+                    const orgSelect = document.getElementById('organization');
+                    const orgName = orgSelect.options[orgSelect.selectedIndex].text;
+                    const orgId = formData.get('organization');
+                    
+                    let orgContainers = Array.from(document.querySelectorAll('.org-name'));
+                    let orgContainer = null;
+                    
+                    // Find the matching organization container
+                    for (let container of orgContainers) {
+                        if (container.textContent.trim() === orgName.trim()) {
+                            orgContainer = container;
+                            break;
+                        }
+                    }
+                    
+                    // If no container exists for this org
+                    if (!orgContainer) {
+                        // Remove "no requests" message if it exists
+                        const noRequests = document.querySelector('.no-requests');
+                        if (noRequests) {
+                            noRequests.remove();
+                        }
+                        
+                        // Create new organization container
+                        const fundingPanel = document.querySelector('.funding-panel-default');
+                        const newOrgContainer = document.createElement('div');
+                        newOrgContainer.className = 'org-requests-container';
+                        
+                        newOrgContainer.innerHTML = `
+                            <div class="org-header">
+                                <div class="org-title-container">
+                                    <h4 class="org-name">${orgName}</h4>
+                                </div>
+                            </div>
+                            <ul class="requests-list-group">
+                            </ul>
+                        `;
+                        
+                        fundingPanel.appendChild(newOrgContainer);
+                        orgContainer = newOrgContainer.querySelector('.org-name');
+                    }
+                    
+                    // Find the parent container and its request list
+                    const orgRequestsContainer = orgContainer.closest('.org-requests-container');
+                    const requestsList = orgRequestsContainer.querySelector('.requests-list-group');
+                    
+                    // Create new list item
+                    const listItem = document.createElement('li');
+                    listItem.className = 'requests-list-item';
+                    listItem.dataset.id = data.id;
+                    
+                    // Format the date properly
+                    const now = new Date();
+                    const formattedDate = now.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                    });
+                    
+                    // Get values directly from the form instead of relying on response
+                    const subject = formData.get('subject');
+                    const description = formData.get('description');
+                    const amount = formData.get('amount');
+                    const link = formData.get('link');
+                    
+                    // Generate the HTML for the new request item with hidden description
+                    listItem.innerHTML = `
+                        <div class="request-header" onclick="toggleDescription(this)">
+                            <strong class="request-subject">${subject}</strong>
+                            <p class="request-details">
+                                Amount: ${amount || '0.00'} | 
+                                Submitted on: ${formattedDate}
+                                ${link ? `| <a href="${link}" target="_blank" onclick="event.stopPropagation()">View Link</a>` : ''}
+                            </p>
+                        </div>
+                        
+                        <!-- Hidden description (will be shown in popup) -->
+                        <div class="request-description" style="display: none;">${description || ''}</div>
+                        
+                        <div class="request-status-controls">
+                            <span class="status-badge status-${data.status || 'submitted'}">
+                                ${data.status_display || 'Submitted'}
+                            </span>
+                        </div>
+                    `;
+                    
+                    // Add to the beginning of the list
+                    if (requestsList.firstChild) {
+                        requestsList.insertBefore(listItem, requestsList.firstChild);
+                    } else {
+                        requestsList.appendChild(listItem);
+                    }
+                    
+                    // Reset form and close modal
+                    form.reset();
+                    modal.style.display = 'none';
+                } else {
+                    // Handle error cases
+                    console.error('Form submission error:', data);
+                    
+                    let errorMessage = 'Error submitting request:\n';
+                    
+                    if (data.errors) {
+                        // Handle form validation errors
+                        Object.keys(data.errors).forEach(field => {
+                            errorMessage += `${field}: ${data.errors[field]}\n`;
+                        });
+                    } else if (data.error) {
+                        // Handle server-side error messages
+                        errorMessage = data.error;
+                    } else {
+                        errorMessage = 'An unknown error occurred';
+                    }
+                    
+                    alert(errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Submission Error:', error);
+                alert('An error occurred while submitting your request. Please check the console for details.');
+            });
+        });
     });
 </script>
+
+<style>
+    /* Optional: Add some styling for the collapsible elements */
+    .request-header {
+        cursor: pointer;
+        padding: 5px 0;
+    }
+    
+    .request-description-container {
+        padding: 5px 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        margin: 5px 0;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .status-submitted {
+        background-color: #f0ad4e;
+        color: white;
+    }
+    
+    .status-review {
+        background-color: #5bc0de;
+        color: white;
+    }
+    
+    .status-approved {
+        background-color: #5cb85c;
+        color: white;
+    }
+    
+    .status-denied {
+        background-color: #d9534f;
+        color: white;
+    }
+    
+    /* Description popup styling */
+    .description-popup .modal-content {
+        max-width: 600px;
+        margin: 10% auto;
+    }
+    
+    .popup-description {
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 4px;
+        margin-top: 10px;
+        white-space: pre-line; /* Preserve line breaks */
+    }
+</style>
+
 {% endblock %}

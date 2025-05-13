@@ -98,11 +98,25 @@ class CreateItemForm(ModelForm):
 
 
 class FundingRequestForm(ModelForm):
+    organization = forms.ModelChoiceField(
+        queryset=Organization.objects.none(),  # Will be set in __init__
+        required=True,
+        label="Organization"
+    )
+    
     class Meta:
         model = FundingRequest
-        fields = ['subject', 'description', 'amount', 'link']
+        fields = ['subject', 'description', 'amount', 'link', 'organization']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
             'amount': forms.NumberInput(attrs={'min': '0', 'step': '0.01'}),
             'link': forms.URLInput(attrs={'placeholder': 'https://example.com'})
         }
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(FundingRequestForm, self).__init__(*args, **kwargs)
+        
+        if user:
+            # Show organizations where the user is a member
+            self.fields['organization'].queryset = Organization.objects.filter(members=user)
