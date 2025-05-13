@@ -653,6 +653,8 @@ def PaymentSuccessful(request,item_id):
     
     )
     thisOrg.tickets.add(new_ticket)
+    item.quantity -= 1
+    item.save()
 
     return render(request, 'buyConfirm.html', {'item': item, 'user_type':user_type})
 
