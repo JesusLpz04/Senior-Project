@@ -145,6 +145,8 @@ PAYPAL_RECEIVER_EMAIL = os.environ.get('PAYPAL_RECEIVER_EMAIL', 'sb-5padl4149991
 
 PAYPAL_TEST = True
 
+
+#info to send purchase emails
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
