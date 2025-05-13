@@ -460,7 +460,6 @@ def fundingRequests_view(request):
                 if funding_request.organization in user_orgs:
                     funding_request.status = new_status
                     funding_request.save()
-                    messages.success(request, f"Request status updated to {funding_request.get_status_display()}")
                     
                     # Redirect to prevent form resubmission
                     return render(request, 'fundingRequests')
