@@ -222,6 +222,8 @@ def expenses_view(request):
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
     curOrg= curProf.current_Org
+    if curOrg == None:
+         return render(request, 'noAccess.html')
     tic=curOrg.tickets.all()
     print(tic)
     for ticket in tic:
@@ -642,7 +644,7 @@ def PaymentSuccessful(request,item_id):
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
-    thisOrg = curProf.current_Org
+    thisOrg = item.organization
 
     new_ticket=CreateTicket.objects.create(
     amount=item.price,
@@ -660,7 +662,10 @@ def PaymentSuccessful(request,item_id):
 
 def Paymentfailed(request,item_id):
     item = Item.objects.get(pk=item_id)
-    return render(request, 'buyDenied.html', {'item': item})
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    user_type = curProf.user_type
+    return render(request, 'buyDenied.html', {'item': item, 'user_type':user_type})
 
 @login_required
 @allowed_users(allowed_roles=['president', 'treasurer'])
