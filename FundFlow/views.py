@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 import logging
+from collections import defaultdict
 
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
@@ -426,15 +427,55 @@ def manageOrg_view(request):
 
 @login_required
 def fundingRequests_view(request):
-    # Get all funding requests for display
-    funding_requests = FundingRequest.objects.all().order_by('-created_at')
-    curUser = request.user
-    curProf = UserProfile.objects.get(user=curUser)
-    user_type = curProf.user_type
+
+    current_user = request.user
+
+    try:
+        #Get the user type of the loged in user
+        curProf = UserProfile.objects.get(user=current_user)
+        user_type = curProf.user_type
+
+        # Get organizations the user is a member of
+        user_orgs = Organization.objects.filter(members=current_user)
+
+        # Get all funding requests for display
+        funding_requests_by_org = defaultdict(list)
+
+        for org in user_orgs:
+            org_requests = FundingRequest.objects.filter(
+                organization = org
+            ).order_by('created_at')
+
+            if org_requests.exists():
+                funding_requests_by_org[org] = org_requests
+
+        # Process status update if form was submitted
+        if request.method == 'POST' and (user_type == 'president' or user_type == 'treasurer'):
+            request_id = request.POST.get('request_id')
+            new_status = request.POST.get('status')
+            
+            if request_id and new_status:
+                funding_request = FundingRequest.objects.get(pk=request_id)
+                # Check if user has permission to update this request (belongs to their organization)
+                if funding_request.organization in user_orgs:
+                    funding_request.status = new_status
+                    funding_request.save()
+                    
+                    # Redirect to prevent form resubmission
+                    return render(request, 'fundingRequests')
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        user_type = None
+        funding_requests_by_org = {}
+        user_orgs = []
+
     context = {
-        'funding_requests': funding_requests,
-        'user_type': user_type
+        'funding_requests_by_org': dict(funding_requests_by_org),
+        'user_type': user_type,
+        'user_orgs' : user_orgs,
     }
+
     template = loader.get_template('fundingRequests.html')
     return HttpResponse(template.render(context, request))
 
@@ -448,18 +489,20 @@ def create_funding_request(request):
             'error': 'Only AJAX requests are supported'
         }, status=400)
     
-    form = FundingRequestForm(request.POST)
+    form = FundingRequestForm(request.POST, user=request.user)
     
     try:
         if form.is_valid():
             funding_request = form.save(commit=False)
-            funding_request.user = request.user
+            funding_request.created_by = request.user
             funding_request.save()
             
             return JsonResponse({
                 'id': funding_request.id,
                 'subject': funding_request.subject,
+                'organization': funding_request.organization.name,
                 'status': funding_request.status,
+                'status_display': funding_request.get_status_display(),
                 'created_at': funding_request.created_at.strftime('%Y-%m-%d %H:%M')
             })
         else:
