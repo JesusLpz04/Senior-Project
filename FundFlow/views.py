@@ -219,8 +219,10 @@ def expenses_view(request):
     curUser = request.user
     curProf = UserProfile.objects.get(user=curUser)
     user_type = curProf.user_type
-
-    for ticket in tickets:
+    curOrg= curProf.current_Org
+    tic=curOrg.tickets.all()
+    print(tic)
+    for ticket in tic:
         operation_symbol = '+' if ticket.operation == 'add' else '-'  
         amount = ticket.amount if ticket.operation == 'add' else -ticket.amount
         running_balance += amount
@@ -232,16 +234,21 @@ def expenses_view(request):
 
     return render(request, 'expenses.html', {
     'tickets_with_balance': list(reversed(ticket_data)),  
-    'balance': balance, 'user_type':user_type  
+    'balance': running_balance, 'user_type':user_type  
     })
     
 @login_required
 def createticket_view(request):
+    curUser = request.user
+    curProf = UserProfile.objects.get(user=curUser)
+    curOrg= curProf.current_Org
     if request.method == 'POST':
         form = CreateTicketForm(request.POST, request.FILES)
         if form.is_valid():
             ticket = form.save(commit=False)
             ticket.save()
+            curOrg.tickets.add(ticket)
+            curOrg.save()
             return redirect('expenses')
     else:
         form = CreateTicketForm()
@@ -468,7 +475,11 @@ def create_funding_request(request):
 @login_required
 @allowed_users(allowed_roles=['president', 'treasurer'])
 def budgetReview_view(request):
-    ticks=CreateTicket.objects.all()
+    curUser=request.user
+    curProf=UserProfile.objects.get(user=curUser)
+    user_type=curProf.user_type
+    curOrg=curProf.current_Org
+    ticks=curOrg.tickets.all()
     category_totals = {}
     for ticket in ticks:
         if ticket.expense_category in category_totals:
@@ -488,9 +499,7 @@ def budgetReview_view(request):
     # values = ', '.join(str(value) for value in expenses.values())  
     # print(labels)
     # print(values)
-    curUser=request.user
-    curProf=UserProfile.objects.get(user=curUser)
-    user_type=curProf.user_type
+
     script = f"""
     var ctx = document.getElementById('budgetChart').getContext('2d');
     new Chart(ctx, {{
