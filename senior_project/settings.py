@@ -145,3 +145,10 @@ PAYPAL_RECEIVER_EMAIL = os.environ.get('PAYPAL_RECEIVER_EMAIL', 'sb-5padl4149991
 
 PAYPAL_TEST = True
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'utrgvmarketplace@gmail.com'
+EMAIL_HOST_PASSWORD = 'wuva daxd guoy uzrg'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
